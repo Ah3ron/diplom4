@@ -27,10 +27,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
   Line,
   Legend,
-  AreaChart,
   Area,
   ComposedChart,
 } from "recharts"
@@ -321,13 +319,31 @@ function TrendAnalysis() {
 }
 
 function PoissonAnalysis() {
+  const [mode, setMode] = useState("auto")
+  const [dataType, setDataType] = useState("incidents")
+  const [periodType, setPeriodType] = useState("monthly")
   const [lambda, setLambda] = useState("4")
   const [timePeriod, setTimePeriod] = useState("12")
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function calculate() {
+  async function calculateAuto() {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await api.statistics.poissonAuto(
+        `data_type=${dataType}&period=${periodType}&time_period=${timePeriod}`
+      )
+      setResult(res)
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function calculateManual() {
     setLoading(true)
     setError(null)
     try {
@@ -342,50 +358,106 @@ function PoissonAnalysis() {
     }
   }
 
-  const chartData =
+  const distData =
     result?.distribution?.map((d: any) => ({
       events: d.k,
       probability: Number((d.probability * 100).toFixed(2)),
       cumulative: Number((d.cumulative * 100).toFixed(2)),
     })) || []
 
+  const periodLabel =
+    periodType === "yearly" ? "год" : periodType === "quarterly" ? "квартал" : "месяц"
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Анализ Пуассона</CardTitle>
         <CardDescription>
-          Моделирование вероятности редких событий (несчастных случаев, отказов)
-          на основе распределения Пуассона
+          Моделирование вероятности редких событий (несчастных случаев, отказов
+          оборудования) на основе распределения Пуассона
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium">
-              λ (среднее число событий)
-            </label>
-            <Input
-              type="number"
-              min="0.1"
-              step="0.1"
-              value={lambda}
-              onChange={(e) => setLambda(e.target.value)}
-              className="w-32"
-            />
+            <label className="text-sm font-medium">Режим</label>
+            <Select value={mode} onValueChange={setMode}>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="auto">Из данных</SelectItem>
+                  <SelectItem value="manual">Ручной ввод λ</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
+
+          {mode === "auto" && (
+            <>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium">Тип данных</label>
+                <Select value={dataType} onValueChange={setDataType}>
+                  <SelectTrigger className="w-52">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="incidents">Несчастные случаи</SelectItem>
+                      <SelectItem value="equipment">Отказы оборудования</SelectItem>
+                      <SelectItem value="safety">Нарушения ТБ</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium">Группировка</label>
+                <Select value={periodType} onValueChange={setPeriodType}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="monthly">По месяцам</SelectItem>
+                      <SelectItem value="quarterly">По кварталам</SelectItem>
+                      <SelectItem value="yearly">По годам</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+
+          {mode === "manual" && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium">λ (среднее число событий)</label>
+              <Input
+                type="number"
+                min="0.1"
+                step="0.1"
+                value={lambda}
+                onChange={(e) => setLambda(e.target.value)}
+                className="w-32"
+              />
+            </div>
+          )}
+
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium">
-              Период (месяцев)
-            </label>
+            <label className="text-sm font-medium">Период прогноза</label>
             <Input
               type="number"
               min="1"
+              max="60"
               value={timePeriod}
               onChange={(e) => setTimePeriod(e.target.value)}
               className="w-32"
             />
           </div>
-          <Button onClick={calculate} disabled={loading}>
+          <Button
+            onClick={mode === "auto" ? calculateAuto : calculateManual}
+            disabled={loading}
+          >
             {loading ? "Расчёт..." : "Рассчитать"}
           </Button>
         </div>
@@ -394,7 +466,20 @@ function PoissonAnalysis() {
 
         {result && (
           <>
-            <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-3">
+            {mode === "auto" && result.period_unit && (
+              <div className="mb-3 text-sm text-muted-foreground">
+                λ = <strong>{result.lambda}</strong> событий/{result.period_unit} |
+                {" "}Всего событий: <strong>{result.total_events}</strong> |
+                {" "}Периодов: <strong>{result.num_periods}</strong> |
+                {" "}Данные: {result.first_date} — {result.last_date}
+              </div>
+            )}
+
+            <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+              <StatCard
+                label="λ (интенсивность)"
+                value={result.lambda?.toFixed(4)}
+              />
               <StatCard
                 label="P(0 событий)"
                 value={`${(result.prob_zero * 100).toFixed(2)}%`}
@@ -404,35 +489,59 @@ function PoissonAnalysis() {
                 value={`${(result.prob_at_least_one * 100).toFixed(2)}%`}
               />
               <StatCard
-                label="Ожидаемое за период"
+                label={`Ожидаемое за ${timePeriod} ${mode === "auto" ? periodLabel + "." : "мес."}`}
                 value={result.expected_in_period?.toFixed(2)}
               />
             </div>
 
-            {chartData.length > 0 && (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="events"
-                    label={{ value: "Число событий", position: "bottom" }}
-                  />
-                  <YAxis
-                    label={{
-                      value: "Вероятность (%)",
-                      angle: -90,
-                      position: "insideLeft",
-                    }}
-                  />
-                  <Tooltip />
-                  <Legend />
-                  <Bar
-                    dataKey="probability"
-                    name="Вероятность (%)"
-                    fill={CHART_COLORS[0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {distData.length > 0 && (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={distData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="events" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="probability"
+                      name="Вероятность (%)"
+                      fill={CHART_COLORS[0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+
+              {mode === "auto" && result.event_counts?.length > 0 && (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    data={result.period_labels.map((l: string, i: number) => ({
+                      period: l,
+                      count: result.event_counts[i],
+                    }))}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="period" tick={{ fontSize: 10 }} />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="count"
+                      name="Событий за период"
+                      fill={CHART_COLORS[1]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            {result.confidence_interval && (
+              <div className="mt-3 text-sm text-muted-foreground">
+                95% доверительный интервал за {timePeriod}{" "}
+                {mode === "auto" ? periodLabel + "." : "мес."}: [
+                <strong>{result.confidence_interval[0]?.toFixed(1)}</strong>,{" "}
+                <strong>{result.confidence_interval[1]?.toFixed(1)}</strong>]
+              </div>
             )}
           </>
         )}

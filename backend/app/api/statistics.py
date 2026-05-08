@@ -163,6 +163,95 @@ async def poisson_estimate(
     }
 
 
+@router.get("/poisson/auto")
+async def poisson_auto(
+    data_type: str = Query("incidents"),
+    period: str = Query("monthly"),
+    time_period: int = Query(12),
+    db: AsyncSession = Depends(get_db),
+):
+    import numpy as np
+    from scipy import stats as sp_stats
+    from datetime import datetime
+
+    if data_type == "incidents":
+        result = await db.execute(select(Incident).order_by(Incident.date))
+        rows = result.scalars().all()
+    elif data_type == "equipment":
+        result = await db.execute(select(EquipmentFailure).order_by(EquipmentFailure.date))
+        rows = result.scalars().all()
+    elif data_type == "safety":
+        result = await db.execute(select(SafetyViolation).order_by(SafetyViolation.date))
+        rows = result.scalars().all()
+    else:
+        return {"error": f"Неизвестный тип данных: {data_type}"}
+
+    if not rows:
+        return {"error": "Нет данных для анализа"}
+
+    grouped: dict[str, int] = {}
+    for row in rows:
+        d = str(row.date)
+        if period == "yearly":
+            key = d[:4]
+        elif period == "quarterly":
+            m = int(d[5:7])
+            q = (m - 1) // 3 + 1
+            key = f"{d[:4]}-Q{q}"
+        else:
+            key = d[:7]
+        grouped[key] = grouped.get(key, 0) + 1
+
+    sorted_items = sorted(grouped.items())
+    labels = [m for m, _ in sorted_items]
+    counts = [c for _, c in sorted_items]
+
+    lam = float(np.mean(counts))
+
+    event_counts_per_period = counts
+    if period == "yearly":
+        lam_per_unit = lam
+        unit_label = "год"
+    elif period == "quarterly":
+        lam_per_unit = lam
+        unit_label = "квартал"
+    else:
+        lam_per_unit = lam
+        unit_label = "месяц"
+
+    n_max = min(int(lam * 3) + 5, 50)
+
+    distribution = []
+    cumulative = 0.0
+    for k in range(n_max + 1):
+        prob = float(sp_stats.poisson.pmf(k, lam))
+        cumulative += prob
+        distribution.append({"k": k, "probability": round(prob, 6), "cumulative": round(cumulative, 6)})
+
+    ci_low, ci_high = sp_stats.poisson.interval(0.95, lam * time_period)
+
+    first_date = str(rows[0].date)[:10] if rows else None
+    last_date = str(rows[-1].date)[:10] if rows else None
+
+    return {
+        "lambda": round(lam, 4),
+        "time_period": time_period,
+        "period_unit": unit_label,
+        "period_type": period,
+        "total_events": len(rows),
+        "num_periods": len(counts),
+        "first_date": first_date,
+        "last_date": last_date,
+        "event_counts": event_counts_per_period,
+        "period_labels": labels,
+        "prob_zero": round(float(sp_stats.poisson.pmf(0, lam)), 6),
+        "prob_at_least_one": round(1 - float(sp_stats.poisson.pmf(0, lam)), 6),
+        "expected_in_period": round(lam * time_period, 2),
+        "distribution": distribution,
+        "confidence_interval": [max(0, float(ci_low)), float(ci_high)],
+    }
+
+
 @router.get("/dashboard")
 async def dashboard(db: AsyncSession = Depends(get_db)):
     inc_count = (await db.execute(select(func.count(Incident.id)))).scalar() or 0
