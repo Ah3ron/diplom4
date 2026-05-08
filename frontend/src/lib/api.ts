@@ -56,7 +56,6 @@ export const api = {
     statistics: () => request<any>("/safety/statistics"),
   },
   risk: {
-    matrix: (data: any) => request<any>("/risk/matrix", { method: "POST", body: JSON.stringify(data) }),
     fmea: (data: any) => request<any>("/risk/fmea", { method: "POST", body: JSON.stringify(data) }),
     history: () => request<any[]>("/risk/history"),
   },

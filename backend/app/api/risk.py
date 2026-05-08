@@ -5,28 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.models.risk_assessment import RiskAssessment
-from app.schemas.fmea import FMEAAnalysis, FMEAInput, FMEARequest
-from app.schemas.risk_matrix import RiskMatrixInput, RiskMatrixResult
-from app.services import calculate_risk_matrix
+from app.schemas.fmea import FMEAAnalysis, FMEARequest
 from app.services.fmea import analyze_fmea
 
 router = APIRouter(prefix="/risk", tags=["Оценка рисков"])
-
-
-@router.post("/matrix", response_model=RiskMatrixResult)
-async def assess_risk_matrix(
-    data: RiskMatrixInput, db: AsyncSession = Depends(get_db)
-):
-    result = calculate_risk_matrix(data)
-    assessment = RiskAssessment(
-        method="risk_matrix",
-        name=f"Матрица рисков: В={data.likelihood}×Т={data.severity}",
-        input_params=data.model_dump_json(),
-        result=result.assessment.model_dump_json(),
-    )
-    db.add(assessment)
-    await db.commit()
-    return result
 
 
 @router.post("/fmea", response_model=FMEAAnalysis)
