@@ -9,11 +9,9 @@ from app.models.equipment import EquipmentFailure
 from app.models.incident import Incident
 from app.models.safety import SafetyViolation
 from app.schemas.statistics import (
-    PoissonInput,
-    PoissonResult,
     TrendResult,
 )
-from app.services.statistics import descriptive_statistics, poisson_analysis, trend_analysis
+from app.services.statistics import descriptive_statistics, trend_analysis
 
 router = APIRouter(prefix="/statistics", tags=["Статистика"])
 
@@ -118,53 +116,8 @@ async def trend(
     }
 
 
-@router.post("/poisson")
-async def poisson_endpoint(data: PoissonInput):
-    result = poisson_analysis(data.event_counts, data.forecast_periods)
-    return {
-        "lambda_est": result.lambda_est,
-        "prob_zero": result.probabilities[0]["probability"] if result.probabilities else 0,
-        "prob_at_least_one": 1 - (result.probabilities[0]["probability"] if result.probabilities else 0),
-        "expected_in_period": result.lambda_est,
-        "distribution": result.probabilities,
-        "forecast": result.forecast,
-        "confidence_interval": list(result.confidence_interval),
-    }
-
-
-@router.get("/poisson/estimate")
-async def poisson_estimate(
-    lambda_val: float = Query(4.0, alias="lambda"),
-    time_period: int = Query(12),
-):
-    import numpy as np
-    from scipy import stats as sp_stats
-
-    lam = lambda_val
-    n_max = min(int(lam * 3) + 5, 50)
-
-    distribution = []
-    cumulative = 0.0
-    for k in range(n_max + 1):
-        prob = float(sp_stats.poisson.pmf(k, lam))
-        cumulative += prob
-        distribution.append({"k": k, "probability": round(prob, 6), "cumulative": round(cumulative, 6)})
-
-    ci_low, ci_high = sp_stats.poisson.interval(0.95, lam * time_period)
-
-    return {
-        "lambda": lam,
-        "time_period": time_period,
-        "prob_zero": round(float(sp_stats.poisson.pmf(0, lam)), 6),
-        "prob_at_least_one": round(1 - float(sp_stats.poisson.pmf(0, lam)), 6),
-        "expected_in_period": round(lam * time_period, 2),
-        "distribution": distribution,
-        "confidence_interval": [max(0, float(ci_low)), float(ci_high)],
-    }
-
-
-@router.get("/poisson/auto")
-async def poisson_auto(
+@router.get("/poisson")
+async def poisson_analysis_endpoint(
     data_type: str = Query("incidents"),
     period: str = Query("monthly"),
     time_period: int = Query(12),

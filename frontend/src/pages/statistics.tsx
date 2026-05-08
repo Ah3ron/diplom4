@@ -319,36 +319,19 @@ function TrendAnalysis() {
 }
 
 function PoissonAnalysis() {
-  const [mode, setMode] = useState("auto")
   const [dataType, setDataType] = useState("incidents")
   const [periodType, setPeriodType] = useState("monthly")
-  const [lambda, setLambda] = useState("4")
   const [timePeriod, setTimePeriod] = useState("12")
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function calculateAuto() {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await api.statistics.poissonAuto(
-        `data_type=${dataType}&period=${periodType}&time_period=${timePeriod}`
-      )
-      setResult(res)
-    } catch (e: any) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function calculateManual() {
+  async function calculate() {
     setLoading(true)
     setError(null)
     try {
       const res = await api.statistics.poisson(
-        `lambda=${lambda}&time_period=${timePeriod}`
+        `data_type=${dataType}&period=${periodType}&time_period=${timePeriod}`
       )
       setResult(res)
     } catch (e: any) {
@@ -374,75 +357,41 @@ function PoissonAnalysis() {
         <CardTitle>Анализ Пуассона</CardTitle>
         <CardDescription>
           Моделирование вероятности редких событий (несчастных случаев, отказов
-          оборудования) на основе распределения Пуассона
+          оборудования) на основе распределения Пуассона. λ вычисляется автоматически из данных.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="mb-4 flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium">Режим</label>
-            <Select value={mode} onValueChange={setMode}>
-              <SelectTrigger className="w-48">
+            <label className="text-sm font-medium">Тип данных</label>
+            <Select value={dataType} onValueChange={setDataType}>
+              <SelectTrigger className="w-52">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="auto">Из данных</SelectItem>
-                  <SelectItem value="manual">Ручной ввод λ</SelectItem>
+                  <SelectItem value="incidents">Несчастные случаи</SelectItem>
+                  <SelectItem value="equipment">Отказы оборудования</SelectItem>
+                  <SelectItem value="safety">Нарушения ТБ</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
-
-          {mode === "auto" && (
-            <>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium">Тип данных</label>
-                <Select value={dataType} onValueChange={setDataType}>
-                  <SelectTrigger className="w-52">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="incidents">Несчастные случаи</SelectItem>
-                      <SelectItem value="equipment">Отказы оборудования</SelectItem>
-                      <SelectItem value="safety">Нарушения ТБ</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium">Группировка</label>
-                <Select value={periodType} onValueChange={setPeriodType}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="monthly">По месяцам</SelectItem>
-                      <SelectItem value="quarterly">По кварталам</SelectItem>
-                      <SelectItem value="yearly">По годам</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
-
-          {mode === "manual" && (
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium">λ (среднее число событий)</label>
-              <Input
-                type="number"
-                min="0.1"
-                step="0.1"
-                value={lambda}
-                onChange={(e) => setLambda(e.target.value)}
-                className="w-32"
-              />
-            </div>
-          )}
-
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium">Группировка</label>
+            <Select value={periodType} onValueChange={setPeriodType}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="monthly">По месяцам</SelectItem>
+                  <SelectItem value="quarterly">По кварталам</SelectItem>
+                  <SelectItem value="yearly">По годам</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium">Период прогноза</label>
             <Input
@@ -454,10 +403,7 @@ function PoissonAnalysis() {
               className="w-32"
             />
           </div>
-          <Button
-            onClick={mode === "auto" ? calculateAuto : calculateManual}
-            disabled={loading}
-          >
+          <Button onClick={calculate} disabled={loading}>
             {loading ? "Расчёт..." : "Рассчитать"}
           </Button>
         </div>
@@ -466,7 +412,7 @@ function PoissonAnalysis() {
 
         {result && (
           <>
-            {mode === "auto" && result.period_unit && (
+            {result.period_unit && (
               <div className="mb-3 text-sm text-muted-foreground">
                 λ = <strong>{result.lambda}</strong> событий/{result.period_unit} |
                 {" "}Всего событий: <strong>{result.total_events}</strong> |
@@ -489,7 +435,7 @@ function PoissonAnalysis() {
                 value={`${(result.prob_at_least_one * 100).toFixed(2)}%`}
               />
               <StatCard
-                label={`Ожидаемое за ${timePeriod} ${mode === "auto" ? periodLabel + "." : "мес."}`}
+                label={`Ожидаемое за ${timePeriod} ${periodLabel}.`}
                 value={result.expected_in_period?.toFixed(2)}
               />
             </div>
@@ -512,7 +458,7 @@ function PoissonAnalysis() {
                 </ResponsiveContainer>
               )}
 
-              {mode === "auto" && result.event_counts?.length > 0 && (
+              {result.event_counts?.length > 0 && (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart
                     data={result.period_labels.map((l: string, i: number) => ({
@@ -537,8 +483,7 @@ function PoissonAnalysis() {
 
             {result.confidence_interval && (
               <div className="mt-3 text-sm text-muted-foreground">
-                95% доверительный интервал за {timePeriod}{" "}
-                {mode === "auto" ? periodLabel + "." : "мес."}: [
+                95% доверительный интервал за {timePeriod} {periodLabel}.: [
                 <strong>{result.confidence_interval[0]?.toFixed(1)}</strong>,{" "}
                 <strong>{result.confidence_interval[1]?.toFixed(1)}</strong>]
               </div>

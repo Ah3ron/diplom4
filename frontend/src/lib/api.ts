@@ -56,15 +56,13 @@ export const api = {
     statistics: () => request<any>("/safety/statistics"),
   },
   risk: {
-    fmea: (data: any) => request<any>("/risk/fmea", { method: "POST", body: JSON.stringify(data) }),
-    fmeaAuto: (params: string) => request<any>(`/risk/fmea/auto?${params}`),
+    fmea: (params: string) => request<any>(`/risk/fmea?${params}`),
     history: () => request<any[]>("/risk/history"),
   },
   statistics: {
     descriptive: (params: string) => request<any>(`/statistics/descriptive?${params}`),
     trend: (params: string) => request<any>(`/statistics/trend?${params}`),
-    poisson: (params: string) => request<any>(`/statistics/poisson/estimate?${params}`),
-    poissonAuto: (params: string) => request<any>(`/statistics/poisson/auto?${params}`),
+    poisson: (params: string) => request<any>(`/statistics/poisson?${params}`),
     dashboard: () => request<any>("/statistics/dashboard"),
   },
 }
