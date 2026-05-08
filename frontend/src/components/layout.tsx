@@ -45,7 +45,7 @@ export function AppLayout() {
               <span className="text-xs text-muted-foreground">ЗАО «СИПР»</span>
             </div>
           </SidebarHeader>
-          <SidebarSeparator />
+          <SidebarSeparator className="m-0" />
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupLabel>Навигация</SidebarGroupLabel>
@@ -74,7 +74,7 @@ export function AppLayout() {
         <SidebarInset>
           <header className="flex h-12 items-center gap-2 border-b px-4">
             <SidebarTrigger />
-            <Separator orientation="vertical" className="h-6" />
+            <Separator orientation="vertical" className="h-6 !self-center" />
             <span className="text-sm text-muted-foreground">
               Программный модуль оценки производственных рисков
             </span>
