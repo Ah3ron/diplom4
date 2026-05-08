@@ -58,6 +58,7 @@ async def descriptive(
 async def trend(
     data_type: str = Query("incidents"),
     period: str = Query("monthly"),
+    forecast_periods: int = Query(6),
     db: AsyncSession = Depends(get_db),
 ):
     if data_type == "incidents":
@@ -84,7 +85,7 @@ async def trend(
     labels = [m for m, _ in sorted_items]
     values = [c for _, c in sorted_items]
 
-    tr: TrendResult = trend_analysis(values, labels)
+    tr: TrendResult = trend_analysis(values, labels, forecast_periods)
 
     data_points = []
     for i, (label, count) in enumerate(sorted_items):
@@ -104,6 +105,8 @@ async def trend(
         ),
         "forecast_values": tr.forecast_values,
         "forecast_labels": tr.forecast_labels,
+        "forecast_lower": tr.forecast_lower,
+        "forecast_upper": tr.forecast_upper,
     }
 
 

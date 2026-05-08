@@ -39,6 +39,8 @@ class TrendResult(BaseModel):
     moving_avg: list[float]
     forecast_values: list[float]
     forecast_labels: list[str]
+    forecast_lower: list[float]
+    forecast_upper: list[float]
 
 
 class StatisticsResponse(BaseModel):

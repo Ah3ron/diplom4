@@ -30,6 +30,9 @@ import {
   LineChart,
   Line,
   Legend,
+  AreaChart,
+  Area,
+  ComposedChart,
 } from "recharts"
 
 const CHART_COLORS = ["#2563eb", "#dc2626", "#16a34a", "#ea580c", "#7c3aed"]
@@ -116,30 +119,63 @@ function DescriptiveStats() {
 function TrendAnalysis() {
   const [dataType, setDataType] = useState("incidents")
   const [period, setPeriod] = useState("monthly")
+  const [forecastPeriods, setForecastPeriods] = useState("6")
   const [trend, setTrend] = useState<any>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     setLoading(true)
     api.statistics
-      .trend(`data_type=${dataType}&period=${period}`)
+      .trend(`data_type=${dataType}&period=${period}&forecast_periods=${forecastPeriods}`)
       .then(setTrend)
       .finally(() => setLoading(false))
-  }, [dataType, period])
+  }, [dataType, period, forecastPeriods])
 
-  const chartData =
+  const historicalData =
     trend?.data?.map((d: any) => ({
       period: d.period,
       count: d.count,
       trend_line: d.trend_value,
+      forecast: null as number | null,
+      ci_upper: null as number | null,
+      ci_lower: null as number | null,
     })) || []
+
+  const lastHistPoint = historicalData[historicalData.length - 1]
+
+  const forecastData: any[] =
+    trend?.forecast_labels?.map((label: string, i: number) => {
+      const val = trend.forecast_values?.[i] ?? null
+      return {
+        period: label,
+        count: null as number | null,
+        trend_line: null as number | null,
+        forecast: val,
+        ci_upper: trend.forecast_upper?.[i] ?? null,
+        ci_lower: trend.forecast_lower?.[i] ?? null,
+      }
+    }) || []
+
+  const bridge: any[] = []
+  if (lastHistPoint && forecastData.length > 0) {
+    bridge.push({
+      period: lastHistPoint.period,
+      count: null,
+      trend_line: lastHistPoint.trend_line,
+      forecast: lastHistPoint.trend_line,
+      ci_upper: lastHistPoint.trend_line,
+      ci_lower: lastHistPoint.trend_line,
+    })
+  }
+
+  const chartData = [...historicalData, ...bridge, ...forecastData]
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Тренд-анализ</CardTitle>
+        <CardTitle>Тренд-анализ с прогнозом</CardTitle>
         <CardDescription>
-          Анализ динамики данных с линейным трендом
+          Линейная регрессия с экстраполяцией и 95% доверительным интервалом
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -168,24 +204,58 @@ function TrendAnalysis() {
               </SelectGroup>
             </SelectContent>
           </Select>
+          <div className="flex flex-col gap-1.5">
+            <Input
+              type="number"
+              min="1"
+              max="24"
+              value={forecastPeriods}
+              onChange={(e) => setForecastPeriods(e.target.value)}
+              className="w-36"
+              placeholder="Периодов прогноза"
+            />
+          </div>
         </div>
 
         {loading && <Skeleton className="h-72" />}
         {!loading && chartData.length > 0 && (
           <>
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={chartData}>
+            <ResponsiveContainer width="100%" height={360}>
+              <ComposedChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="period" tick={{ fontSize: 11 }} />
                 <YAxis />
                 <Tooltip />
                 <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="ci_upper"
+                  stroke="none"
+                  fill="#7c3aed"
+                  fillOpacity={0.12}
+                  name="95% ДИ"
+                  dot={false}
+                  activeDot={false}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="ci_lower"
+                  stroke="none"
+                  fill="#ffffff"
+                  fillOpacity={1}
+                  name=""
+                  dot={false}
+                  activeDot={false}
+                  legendType="none"
+                />
                 <Line
                   type="monotone"
                   dataKey="count"
                   name="Факт"
                   stroke={CHART_COLORS[0]}
                   strokeWidth={2}
+                  dot={{ r: 3 }}
+                  connectNulls={false}
                 />
                 <Line
                   type="monotone"
@@ -194,8 +264,20 @@ function TrendAnalysis() {
                   stroke={CHART_COLORS[1]}
                   strokeDasharray="5 5"
                   strokeWidth={2}
+                  dot={false}
+                  connectNulls={false}
                 />
-              </LineChart>
+                <Line
+                  type="monotone"
+                  dataKey="forecast"
+                  name="Прогноз"
+                  stroke={CHART_COLORS[4]}
+                  strokeDasharray="8 4"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: CHART_COLORS[4] }}
+                  connectNulls={false}
+                />
+              </ComposedChart>
             </ResponsiveContainer>
             {trend?.slope !== undefined && (
               <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
@@ -212,6 +294,14 @@ function TrendAnalysis() {
                       ? "↓ Снижение"
                       : "→ Стабильно"}
                 </span>
+                {trend.forecast_values?.length > 0 && (
+                  <span>
+                    Прогноз ({trend.forecast_values.length} мес.):{" "}
+                    <strong>
+                      {trend.forecast_values.map((v: number) => v.toFixed(1)).join(" → ")}
+                    </strong>
+                  </span>
+                )}
               </div>
             )}
           </>

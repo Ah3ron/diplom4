@@ -56,7 +56,7 @@ def trend_analysis(values: list[float], labels: list[str], forecast_periods: int
     x = np.arange(len(values))
     y = np.array(values)
 
-    slope, intercept, r_value, _, _ = sp_stats.linregress(x, y)
+    slope, intercept, r_value, _, std_err = sp_stats.linregress(x, y)
     r_squared = r_value**2
 
     window = min(3, len(values))
@@ -66,6 +66,20 @@ def trend_analysis(values: list[float], labels: list[str], forecast_periods: int
     future_x = np.arange(len(values), len(values) + forecast_periods)
     forecast_vals = slope * future_x + intercept
     forecast_floats = [round(max(0, float(v)), 4) for v in forecast_vals]
+
+    n = len(values)
+    x_mean = np.mean(x)
+    ss_x = np.sum((x - x_mean) ** 2)
+    se_y = np.sqrt(np.sum((y - (slope * x + intercept)) ** 2) / (n - 2)) if n > 2 else 0
+    t_crit = float(sp_stats.t.ppf(0.975, max(n - 2, 1)))
+
+    forecast_lower = []
+    forecast_upper = []
+    for xi, fv in zip(future_x, forecast_floats):
+        se_pred = se_y * np.sqrt(1 + 1 / n + (xi - x_mean) ** 2 / ss_x) if ss_x > 0 else se_y
+        margin = t_crit * se_pred
+        forecast_lower.append(round(max(0, float(fv - margin)), 4))
+        forecast_upper.append(round(max(0, float(fv + margin)), 4))
 
     last_label = labels[-1] if labels else "0"
     try:
@@ -96,4 +110,6 @@ def trend_analysis(values: list[float], labels: list[str], forecast_periods: int
         moving_avg=ma_floats,
         forecast_values=forecast_floats,
         forecast_labels=forecast_labels,
+        forecast_lower=forecast_lower,
+        forecast_upper=forecast_upper,
     )
