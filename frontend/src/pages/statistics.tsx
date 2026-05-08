@@ -179,40 +179,49 @@ function TrendAnalysis() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 flex flex-wrap gap-2">
-          <Select value={dataType} onValueChange={setDataType}>
-            <SelectTrigger className="w-52">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="incidents">Несчастные случаи</SelectItem>
-                <SelectItem value="equipment">Отказы оборудования</SelectItem>
-                <SelectItem value="safety">Нарушения ТБ</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="monthly">По месяцам</SelectItem>
-                <SelectItem value="quarterly">По кварталам</SelectItem>
-                <SelectItem value="yearly">По годам</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+        <div className="mb-4 flex flex-wrap items-end gap-2">
           <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium">Тип данных</label>
+            <Select value={dataType} onValueChange={setDataType}>
+              <SelectTrigger className="w-52">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="incidents">Несчастные случаи</SelectItem>
+                  <SelectItem value="equipment">Отказы оборудования</SelectItem>
+                  <SelectItem value="safety">Нарушения ТБ</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium">Группировка</label>
+            <Select value={period} onValueChange={setPeriod}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="monthly">По месяцам</SelectItem>
+                  <SelectItem value="quarterly">По кварталам</SelectItem>
+                  <SelectItem value="yearly">По годам</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium">Периодов прогноза</label>
             <Input
               type="number"
               min="1"
-              max="24"
+              max="12"
               value={forecastPeriods}
-              onChange={(e) => setForecastPeriods(e.target.value)}
+              onChange={(e) => {
+                const v = Math.min(12, Math.max(1, Number(e.target.value) || 1))
+                setForecastPeriods(String(v))
+              }}
               className="w-36"
-              placeholder="Периодов прогноза"
             />
           </div>
         </div>

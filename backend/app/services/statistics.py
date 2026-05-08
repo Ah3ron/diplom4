@@ -81,20 +81,7 @@ def trend_analysis(values: list[float], labels: list[str], forecast_periods: int
         forecast_lower.append(round(max(0, float(fv - margin)), 4))
         forecast_upper.append(round(max(0, float(fv + margin)), 4))
 
-    last_label = labels[-1] if labels else "0"
-    try:
-        parts = last_label.split("-")
-        year, month = int(parts[0]), int(parts[1])
-    except (ValueError, IndexError):
-        year, month = 2025, 12
-
-    forecast_labels = []
-    for i in range(forecast_periods):
-        month += 1
-        if month > 12:
-            month = 1
-            year += 1
-        forecast_labels.append(f"{year}-{month:02d}")
+    forecast_labels = _generate_forecast_labels(labels, forecast_periods)
 
     if slope > 0.05:
         direction = "Растущий"
@@ -113,3 +100,35 @@ def trend_analysis(values: list[float], labels: list[str], forecast_periods: int
         forecast_lower=forecast_lower,
         forecast_upper=forecast_upper,
     )
+
+
+def _generate_forecast_labels(labels: list[str], count: int) -> list[str]:
+    last = labels[-1] if labels else "2025-01"
+    if "-Q" in last:
+        parts = last.split("-Q")
+        year, q = int(parts[0]), int(parts[1])
+        result = []
+        for _ in range(count):
+            q += 1
+            if q > 4:
+                q = 1
+                year += 1
+            result.append(f"{year}-Q{q}")
+        return result
+    elif len(last) == 4 and last.isdigit():
+        year = int(last)
+        return [str(year + i + 1) for i in range(count)]
+    else:
+        try:
+            parts = last.split("-")
+            year, month = int(parts[0]), int(parts[1])
+        except (ValueError, IndexError):
+            year, month = 2025, 12
+        result = []
+        for _ in range(count):
+            month += 1
+            if month > 12:
+                month = 1
+                year += 1
+            result.append(f"{year}-{month:02d}")
+        return result

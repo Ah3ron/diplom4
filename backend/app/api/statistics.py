@@ -75,7 +75,15 @@ async def trend(
 
     grouped: dict[str, int] = {}
     for row in rows:
-        key = str(row.date)[:7]
+        d = str(row.date)
+        if period == "yearly":
+            key = d[:4]
+        elif period == "quarterly":
+            m = int(d[5:7])
+            q = (m - 1) // 3 + 1
+            key = f"{d[:4]}-Q{q}"
+        else:
+            key = d[:7]
         grouped[key] = grouped.get(key, 0) + 1
 
     if not grouped:
