@@ -1,14 +1,59 @@
+import io
 from datetime import date
 from typing import Optional
+
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from app.schemas import IncidentResponse
 from app.schemas.equipment import EquipmentFailureResponse
 from app.schemas.safety import SafetyViolationResponse
 
+_DEJAVU_PATHS = {
+    "DejaVuSans": "/usr/share/fonts/TTF/DejaVuSans.ttf",
+    "DejaVuSans-Bold": "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
+}
+
+_fonts_registered = False
+
+
+def _register_fonts():
+    global _fonts_registered
+    if _fonts_registered:
+        return
+    for name, path in _DEJAVU_PATHS.items():
+        try:
+            pdfmetrics.registerFont(TTFont(name, path))
+        except Exception:
+            pass
+    _fonts_registered = True
+
+
+def _title_style():
+    return ParagraphStyle(
+        "RuTitle",
+        fontName="DejaVuSans-Bold",
+        fontSize=14,
+        leading=18,
+        spaceAfter=6,
+    )
+
+
+def _normal_style():
+    return ParagraphStyle(
+        "RuNormal",
+        fontName="DejaVuSans",
+        fontSize=10,
+        leading=13,
+    )
+
 
 def generate_incidents_excel(incidents: list[IncidentResponse]) -> bytes:
-    import io
-
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.utils import get_column_letter
@@ -61,22 +106,15 @@ def generate_incidents_pdf(
     incidents: list[IncidentResponse],
     stats: Optional[dict] = None,
 ) -> bytes:
-    import io
-
-    from reportlab.lib import colors
-    from reportlab.lib.pagesizes import A4, landscape
-    from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.lib.units import mm
-    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    _register_fonts()
 
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=landscape(A4))
-    styles = getSampleStyleSheet()
     elements = []
 
-    elements.append(Paragraph("Отчёт по производственному травматизму СИПР", styles["Title"]))
+    elements.append(Paragraph("Отчёт по производственному травматизму СИПР", _title_style()))
     elements.append(Spacer(1, 5 * mm))
-    elements.append(Paragraph(f"Дата формирования: {date.today()}", styles["Normal"]))
+    elements.append(Paragraph(f"Дата формирования: {date.today()}", _normal_style()))
     elements.append(Spacer(1, 5 * mm))
 
     if stats:
@@ -94,6 +132,9 @@ def generate_incidents_pdf(
                     ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#4472C4")),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
                     ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                    ("FONTNAME", (0, 0), (-1, -1), "DejaVuSans"),
+                    ("FONTNAME", (0, 0), (-1, 0), "DejaVuSans-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 9),
                 ]
             )
         )
@@ -112,6 +153,8 @@ def generate_incidents_pdf(
                 ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#4472C4")),
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
                 ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("FONTNAME", (0, 0), (-1, -1), "DejaVuSans"),
+                ("FONTNAME", (0, 0), (-1, 0), "DejaVuSans-Bold"),
                 ("FONTSIZE", (0, 0), (-1, -1), 8),
             ]
         )
