@@ -33,8 +33,19 @@ export async function exportExcel(dataType: string): Promise<Blob> {
   return res.blob()
 }
 
-export async function exportPdf(dataType: string): Promise<Blob> {
-  const res = await fetch(`${API_BASE}/export/pdf?data_type=${dataType}`)
+export async function exportReport(
+  dataType: string,
+  period: string,
+  forecastPeriods: number,
+  timePeriod: number,
+): Promise<Blob> {
+  const params = new URLSearchParams({
+    data_type: dataType,
+    period,
+    forecast_periods: String(forecastPeriods),
+    time_period: String(timePeriod),
+  })
+  const res = await fetch(`${API_BASE}/export/report?${params}`)
   if (!res.ok) throw new Error(res.statusText)
   return res.blob()
 }
