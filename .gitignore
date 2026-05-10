@@ -9,3 +9,5 @@ dist/
 .venv/
 *.egg-info/
 .uv/
+*.pdf
+*.docx
