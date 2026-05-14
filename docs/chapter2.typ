@@ -1,5 +1,7 @@
 = МОДЕЛИРОВАНИЕ И ПРОЕКТИРОВАНИЕ ПРОГРАММНОЙ СИСТЕМЫ
 
+#import "@preview/pintorita:0.1.4"
+
 == Разработка концептуальной модели данных
 
 Концептуальная модель данных представляет собой абстрактное описание предметной области, отражающее основные сущности и связи между ними без учёта особенностей конкретной системы управления базами данных. Концептуальная модель разрабатываемой программной системы оценки производственных рисков включает следующие основные сущности:
@@ -90,18 +92,133 @@
 
 Доступ к базе данных из серверной части приложения осуществляется через ORM-библиотеку SQLAlchemy, обеспечивающую объектно-реляционное отображение и автоматическую генерацию SQL-запросов. Использование ORM повышает безопасность (защита от SQL-инъекций), улучшает читаемость кода и упрощает сопровождение.
 
-Физическая модель данных полностью соответствует логической модели, описанной в разделе 2.2. Типы данных SQLite (TEXT, INTEGER, REAL) отображаются на типы Python (str, int, float) через модели SQLAlchemy. Диаграмма физической модели данных приведена на рисунке @fig:physical_model.
+Физическая модель данных полностью соответствует логической модели, описанной в разделе 2.2. Типы данных SQLite (TEXT, INTEGER, REAL) отображаются на типы Python (str, int, float) через модели SQLAlchemy. Диаграмма физической модели данных приведена на рисунке
 
 #figure(
-  rect(
-    width: 100%,
-    stroke: 0.5pt,
-    inset: 10pt,
-    align(center)[
-      #text(style: "italic", size: 12pt)[Схема физической модели данных приведена в приложении А]
-    ],
-  ),
-  caption: [Физическая модель базы данных (схема)],
+  ```pintora
+  erDiagram
+    title: Логическая модель базы данных
+    INCIDENTS {
+      int id PK "уникальный идентификатор"
+      date date "дата инцидента"
+      varchar department "подразделение"
+      varchar incident_type "тип инцидента"
+      varchar severity "тяжесть"
+      int days_lost "дни нетрудоспособности"
+      text description "описание"
+    }
+    EQUIPMENT_FAILURES {
+      int id PK "уникальный идентификатор"
+      date date "дата отказа"
+      varchar equipment_type "тип оборудования"
+      varchar equipment_name "наименование"
+      float operating_hours "наработка, часов"
+      float downtime_hours "время простоя, часов"
+      varchar failure_cause "причина отказа"
+      float repair_cost "стоимость ремонта"
+    }
+    SAFETY_VIOLATIONS {
+      int id PK "уникальный идентификатор"
+      date date "дата выявления"
+      varchar department "подразделение"
+      varchar violation_type "тип нарушения"
+      boolean is_audit_finding "выявлено при аудите"
+      varchar responsible "ответственный"
+    }
+    MEDICAL_EXAMS {
+      int id PK "уникальный идентификатор"
+      date date "дата осмотра"
+      varchar profession "профессия"
+      varchar department "подразделение"
+      text findings "результаты"
+      varchar disease_category "категория заболевания"
+    }
+    RISK_ASSESSMENTS {
+      int id PK "уникальный идентификатор"
+      varchar method "метод анализа"
+      varchar name "наименование"
+      text input_params "входные параметры"
+      text result "результат"
+      datetime created_at "дата проведения"
+      varchar author "автор"
+    }
+    INCIDENTS }o--o{ EQUIPMENT_FAILURES : "связь через подразделение"
+    INCIDENTS }o--o{ SAFETY_VIOLATIONS : "корреляция"
+    EQUIPMENT_FAILURES }o--o{ MEDICAL_EXAMS : "связь через подразделение"
+    RISK_ASSESSMENTS }o--o{ INCIDENTS : "анализ данных"
+    RISK_ASSESSMENTS }o--o{ EQUIPMENT_FAILURES : "анализ данных"
+  ```,
+  caption: [Логическая модель базы данных],
+) <fig:logical_model>
+
+== Построение и описание физической модели базы данных
+
+Физическая модель базы данных определяет конкретную реализацию в выбранной системе управления базами данных. В качестве СУБД для разрабатываемого программного модуля выбрана SQLite — встраиваемая реляционная СУБД, обладающая следующими преимуществами для решения поставленной задачи:
+
+- отсутствие необходимости в отдельном сервере баз данных, что упрощает развёртывание и эксплуатацию;
+- нулевая конфигурация — база данных хранится в единственном файле;
+- полная поддержка стандарта SQL-92;
+- высокая производительность для объёмов данных, характерных для решаемой задачи;
+- бесплатность и открытый исходный код.
+
+Доступ к базе данных из серверной части приложения осуществляется через ORM-библиотеку SQLAlchemy, обеспечивающую объектно-реляционное отображение и автоматическую генерацию SQL-запросов. Использование ORM повышает безопасность (защита от SQL-инъекций), улучшает читаемость кода и упрощает сопровождение.
+
+Физическая модель данных полностью соответствует логической модели, описанной в разделе 2.2. Типы данных SQLite (TEXT, INTEGER, REAL) отображаются на типы Python (str, int, float) через модели SQLAlchemy. Диаграмма физической модели данных приведена на рисунке
+#figure(
+  ```pintora
+  erDiagram
+    title: Физическая модель базы данных (SQLite)
+    INCIDENTS {
+      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
+      TEXT date "DATE NOT NULL"
+      TEXT department "VARCHAR(100)"
+      TEXT incident_type "VARCHAR(100)"
+      TEXT severity "VARCHAR(20)"
+      INTEGER days_lost "INTEGER"
+      TEXT description "TEXT"
+    }
+    EQUIPMENT_FAILURES {
+      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
+      TEXT date "DATE NOT NULL"
+      TEXT equipment_type "VARCHAR(100)"
+      TEXT equipment_name "VARCHAR(100)"
+      REAL operating_hours "REAL"
+      REAL downtime_hours "REAL"
+      TEXT failure_cause "VARCHAR(100)"
+      REAL repair_cost "REAL"
+    }
+    SAFETY_VIOLATIONS {
+      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
+      TEXT date "DATE NOT NULL"
+      TEXT department "VARCHAR(100)"
+      TEXT violation_type "VARCHAR(100)"
+      INTEGER is_audit_finding "BOOLEAN"
+      TEXT responsible "VARCHAR(100)"
+    }
+    MEDICAL_EXAMS {
+      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
+      TEXT date "DATE NOT NULL"
+      TEXT profession "VARCHAR(100)"
+      TEXT department "VARCHAR(100)"
+      TEXT findings "TEXT"
+      TEXT disease_category "VARCHAR(100)"
+    }
+    RISK_ASSESSMENTS {
+      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
+      TEXT method "VARCHAR(20)"
+      TEXT name "VARCHAR(200)"
+      TEXT input_params "TEXT"
+      TEXT result "TEXT"
+      TEXT created_at "DATETIME"
+      TEXT author "VARCHAR(100)"
+    }
+    INCIDENTS }o--o{ EQUIPMENT_FAILURES : "FOREIGN KEY (department)"
+    INCIDENTS }o--o{ SAFETY_VIOLATIONS : "FOREIGN KEY (department)"
+    EQUIPMENT_FAILURES }o--o{ MEDICAL_EXAMS : "FOREIGN KEY (department)"
+    RISK_ASSESSMENTS }o--o{ INCIDENTS : "JOIN через input_params"
+    RISK_ASSESSMENTS }o--o{ EQUIPMENT_FAILURES : "JOIN через input_params"
+  ```,
+  caption: [Физическая модель базы данных (схема SQLite)],
 ) <fig:physical_model>
 
 == Выводы по главе 2

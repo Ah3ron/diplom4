@@ -1,6 +1,4 @@
-= ПРИЛОЖЕНИЕ В <appendix:c>
-
-// UML-диаграммы
+= UML-диаграммы программного модуля <appendix:c>
 
 #set par(first-line-indent: 0cm)
 

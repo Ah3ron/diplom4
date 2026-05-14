@@ -1,7 +1,10 @@
 // main.typ — Точка входа дипломного проекта
 // Компиляция: typst compile docs/main.typ docs/diploma.pdf --root .
 
-#import "@preview/modern-g7-32:0.2.0": abstract, gost, appendixes
+#import "@preview/modern-g7-32:0.2.0": abstract, appendixes, gost
+
+#import "@preview/pintorita:0.1.4"
+#show raw.where(lang: "pintora"): it => pintorita.render(it.text, style: "default")
 
 #show: gost.with(
   ministry: "Министерство образования Республики Беларусь",
@@ -18,6 +21,46 @@
   ),
   add-pagebreaks: true,
 )
+
+// ── Нумерация глав: «ГЛАВА 1» + название по центру ──────────────
+#show heading.where(level: 1): it => {
+  if it.numbering != none {
+    context {
+      let n = counter(heading).get().first()
+      pagebreak(weak: true)
+      align(center)[
+        #text(weight: "bold", size: 14pt)[ГЛАВА #n]
+        #linebreak()
+        #text(weight: "bold", size: 14pt)[#it.body]
+      ]
+    }
+  } else {
+    pagebreak(weak: true)
+    align(center, text(weight: "bold", size: 14pt, upper(it.body)))
+  }
+}
+
+// show raw/code blocks in figures as Рисунок not Листинг
+#show figure.where(kind: raw): set figure(supplement: [Рисунок])
+
+// ── Оглавление: «ГЛАВА 1  НАЗВАНИЕ .... страница» ──────────────
+// Структурные разделы — капсом
+#show outline.entry.where(level: 1): it => {
+  let in-appendix = state("appendixes", false).at(it.element.location())
+  if it.element.numbering != none and not in-appendix {
+    link(it.element.location(), it.indented(
+      none,
+      [ГЛАВА #it.prefix()] + sym.space + it.element.body + sym.space + box(width: 1fr, it.fill) + it.page(),
+    ))
+  } else if it.element.numbering == none and not in-appendix {
+    link(it.element.location(), it.indented(
+      none,
+      upper(it.element.body) + sym.space + box(width: 1fr, it.fill) + it.page(),
+    ))
+  } else {
+    it
+  }
+}
 
 #abstract(
   "оценка рисков",
@@ -40,7 +83,7 @@
   Цель работы — разработка программного модуля оценки производственных рисков на основе статистических моделей (описательная статистика, тренд-анализ с прогнозом, анализ Пуассона, FMEA-анализ). Программный модуль реализован по клиент-серверной архитектуре: серверная часть на Python 3.13 + FastAPI, клиентская на React 19 + TypeScript. База данных — SQLite через SQLAlchemy ORM.
 ]
 
-#outline()
+#outline(title: [Оглавление])
 
 // ── Перечень условных обозначений ──────────────────────────────
 #include "abbreviations.typ"
@@ -71,6 +114,7 @@
 
 // ── Приложения ─────────────────────────────────────────────────
 #show: appendixes
+#show heading: set align(right)
 
 #include "appendix-a.typ"
 #include "appendix-b.typ"

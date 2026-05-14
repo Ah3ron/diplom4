@@ -1,6 +1,4 @@
-= ПРИЛОЖЕНИЕ Г <appendix:d>
-
-// Фрагменты кода
+= Фрагменты программного кода <appendix:d>
 
 #set par(first-line-indent: 0cm)
 
