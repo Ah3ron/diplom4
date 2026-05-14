@@ -1,4 +1,4 @@
-#heading(numbering: none)[ПЕРЕЧЕНЬ УСЛОВНЫХ ОБОЗНАЧЕНИЙ И СОКРАЩЕНИЙ] <abbreviations>
+#heading(numbering: none)[Перечень сокращений и обозначений] <abbreviations>
 // abbreviations.typ
 
 #set par(first-line-indent: 0cm)
