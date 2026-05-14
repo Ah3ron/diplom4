@@ -43,6 +43,19 @@
 // show raw/code blocks in figures as Рисунок not Листинг
 #show figure.where(kind: raw): set figure(supplement: [Рисунок])
 
+// Нумерация рисунков: Рисунок 2.2 (глава.номер_в_главе)
+#set figure(numbering: n => {
+  context {
+    let ch = counter(heading).get()
+    if ch.len() > 0 {
+      let chapter-num = ch.first()
+      [#chapter-num.#n]
+    } else {
+      [#n]
+    }
+  }
+})
+
 // ── Оглавление: «ГЛАВА 1  НАЗВАНИЕ .... страница» ──────────────
 // Структурные разделы — капсом
 #show outline.entry.where(level: 1): it => {
