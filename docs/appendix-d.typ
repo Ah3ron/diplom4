@@ -67,18 +67,19 @@ async def auto_fmea(
 
 #set text(size: 11pt, font: "DejaVu Sans Mono")
 ```typescript
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = "http://localhost:8000/api"
 
-async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${endpoint}`, {
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json", ...options?.headers },
     ...options,
-  });
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail || response.statusText);
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || res.statusText)
   }
-  return response.json();
+  if (res.status === 204) return undefined as T
+  return res.json()
 }
 
 export const api = {
@@ -88,19 +89,19 @@ export const api = {
   },
   risk: {
     fmea: (params: string) =>
-      request<FMEResult>(`/risk/fmea?${params}`),
-    history: () => request<RiskAssessment[]>("/risk/history"),
+      request<any>(`/risk/fmea?${params}`),
+    history: () => request<any[]>("/risk/history"),
   },
   statistics: {
     descriptive: (dataType: string) =>
-      request<DescriptiveStats>(`/statistics/descriptive?data_type=${dataType}`),
+      request<any>(`/statistics/descriptive?data_type=${dataType}`),
     trend: (params: string) =>
-      request<TrendResult>(`/statistics/trend?${params}`),
+      request<any>(`/statistics/trend?${params}`),
     poisson: (params: string) =>
-      request<PoissonResult>(`/statistics/poisson?${params}`),
-    dashboard: () => request<DashboardData>("/statistics/dashboard"),
+      request<any>(`/statistics/poisson?${params}`),
+    dashboard: () => request<any>("/statistics/dashboard"),
   },
-};
+}
 ```
 
 #set text(size: 14pt, font: "Times New Roman")
@@ -109,39 +110,30 @@ export const api = {
 
 #set text(size: 11pt, font: "DejaVu Sans Mono")
 ```python
-FONT_DIR = "/usr/share/fonts/TTF/"
-TNR = "DejaVuSans"
-TNR_B = "DejaVuSans-Bold"
+FONTS = {
+    "TNR": "/usr/share/fonts/TTF/times.ttf",
+    "TNR-B": "/usr/share/fonts/TTF/timesbd.ttf",
+    "TNR-I": "/usr/share/fonts/TTF/timesi.ttf",
+    "TNR-BI": "/usr/share/fonts/TTF/timesbi.ttf",
+}
 
-pdfmetrics.registerFont(TTFont(TNR, FONT_DIR + "DejaVuSans.ttf"))
-pdfmetrics.registerFont(TTFont(TNR_B, FONT_DIR + "DejaVuSans-Bold.ttf"))
+for name, path in FONTS.items():
+    pdfmetrics.registerFont(TTFont(name, path))
 
 def _body():
     return ParagraphStyle(
-        "Body",
-        fontName=TNR,
-        fontSize=14,
-        leading=21,
-        alignment=TA_JUSTIFY,
-        firstLineIndent=28.35,
+        "body", fontName="TNR", fontSize=14,
+        leading=21, firstLineIndent=28.35, alignment=4,
     )
 
 def _h1():
     return ParagraphStyle(
-        "H1",
-        fontName=TNR_B,
-        fontSize=14,
-        leading=21,
-        alignment=TA_CENTER,
-        spaceBefore=18,
+        "h1", fontName="TNR-B", fontSize=14,
+        leading=21, spaceBefore=18, spaceAfter=12, alignment=1,
     )
 
 def generate_full_report(
-    db_data: dict,
-    descriptive: dict | None,
-    trend: dict | None,
-    poisson: dict | None,
-    fmea: dict | None,
+    db_data, descriptive, trend, poisson, fmea,
 ) -> bytes:
     elements = _build_report_elements(
         db_data, descriptive, trend, poisson, fmea
