@@ -1,0 +1,57 @@
+@startuml
+actor "Специалист по ОТ" as User
+boundary "Веб-интерфейс" as UI
+control "REST API" as API
+boundary "Сервис статистики" as StatSvc
+database "База данных" as DB
+
+== Загрузка данных ==
+User -> UI: Загрузка данных из файла
+activate UI
+UI -> API: POST /api/upload/
+activate API
+API -> DB: Сохранение записей
+activate DB
+DB --> API: 201 Created / подтверждение
+deactivate DB
+API --> UI: 200 OK / статус загрузки
+deactivate API
+UI --> User: Данные загружены
+deactivate UI
+
+== Запуск анализа ==
+User -> UI: Запуск анализа
+activate UI
+UI -> API: GET /api/statistics/descriptive
+activate API
+API -> StatSvc: descriptive_stats()
+activate StatSvc
+StatSvc -> DB: SELECT ... FROM incidents
+activate DB
+DB --> StatSvc: Результаты запроса
+deactivate DB
+StatSvc --> API: Статистические показатели (JSON)
+deactivate StatSvc
+API --> UI: 200 OK + JSON с результатами
+deactivate API
+UI --> User: Отображение графиков и таблиц
+deactivate UI
+
+== Формирование PDF-отчёта ==
+User -> UI: Формирование PDF-отчёта
+activate UI
+UI -> API: GET /api/report/pdf
+activate API
+API -> StatSvc: Запрос всех методов анализа
+activate StatSvc
+StatSvc -> DB: Выборка всех данных
+activate DB
+DB --> StatSvc: Данные
+deactivate DB
+StatSvc --> API: Результаты анализа
+deactivate StatSvc
+API --> UI: 200 OK + PDF-файл
+deactivate API
+UI --> User: Скачивание отчёта
+deactivate UI
+@enduml
