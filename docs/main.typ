@@ -1,25 +1,13 @@
 // main.typ — Точка входа дипломного проекта
 // Компиляция: typst compile docs/main.typ docs/diploma.pdf --root .
 
-#import "@preview/modern-g7-32:0.2.0": abstract, appendixes, gost
+#import "@preview/modern-g7-32:0.2.0": abstract, appendix-heading, appendixes, gost
 
 #import "@preview/pintorita:0.1.4"
 #show raw.where(lang: "pintora"): it => pintorita.render(it.text, style: "default")
 
 #show: gost.with(
-  ministry: "Министерство образования Республики Беларусь",
-  organization: (
-    full: "Учреждение образования «Белорусско-Российский университет»",
-    short: "Белорусско-Российский университет",
-  ),
-  about: "О дипломном проекте",
-  subject: "Программный модуль оценки производственных рисков ЗАО «Солигорский институт проблем ресурсосбережения» на основе статистических моделей",
-  manager: (name: "И.О. Руководитель", position: "Старший преподаватель"),
-  city: "Могилёв",
-  performers: (
-    (name: "А.Р. Студент", position: "Студент группы ПИ-191"),
-  ),
-  add-pagebreaks: true,
+  hide-title: true,
 )
 
 // ── Нумерация глав: «ГЛАВА 1» + название по центру ──────────────
@@ -85,7 +73,7 @@
   "FastAPI",
   "React",
 )[
-  Дипломный проект: 58 страниц, 18 рисунков, 13 таблиц, 31 источник, 4 приложения.
+  Дипломный проект: 65 страниц, 18 рисунков, 13 таблиц, 29 источников, 4 приложения.
 
   Ключевые слова: оценка рисков, FMEA, анализ Пуассона, тренд-анализ, программный модуль, статистические модели, база данных, веб-приложение, FastAPI, React.
 
@@ -127,9 +115,6 @@
 
 // ── Приложения ─────────────────────────────────────────────────
 #show: appendixes
-#show heading: set align(right)
+#include "appendix.typ"
 
-#include "appendix-a.typ"
-#include "appendix-b.typ"
-#include "appendix-c.typ"
-#include "appendix-d.typ"
+

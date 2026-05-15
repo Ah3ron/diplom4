@@ -1,15 +1,4 @@
-= Фрагменты программного кода <appendix:d>
-
-#set par(first-line-indent: 0cm)
-
-#align(center)[
-  #text(14pt, weight: "bold")[Фрагменты программного кода]
-]
-
-#v(0.5cm)
-
-== Фрагмент кода модуля автоматического FMEA-анализа (auto\_fmea.py)
-
+= фрагмент кода
 #set text(size: 11pt, font: "DejaVu Sans Mono")
 ```python
 async def auto_fmea(
@@ -61,7 +50,7 @@ async def auto_fmea(
 
 #set text(size: 14pt, font: "Times New Roman")
 
-== Фрагмент кода API-клиента (frontend/src/lib/api.ts)
+Фрагмент кода API-клиента (frontend/src/lib/api.ts)
 
 #set text(size: 11pt, font: "DejaVu Sans Mono")
 ```typescript
@@ -104,7 +93,7 @@ export const api = {
 
 #set text(size: 14pt, font: "Times New Roman")
 
-== Фрагмент кода генерации PDF-отчёта (report.py)
+Фрагмент кода генерации PDF-отчёта (report.py)
 
 #set text(size: 11pt, font: "DejaVu Sans Mono")
 ```python
