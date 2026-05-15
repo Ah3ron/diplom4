@@ -1,4 +1,5 @@
-= фрагмент кода
+= Фрагмент кода автоматического FMEA-анализа
+
 #set text(size: 11pt, font: "DejaVu Sans Mono")
 ```python
 async def auto_fmea(
@@ -50,7 +51,7 @@ async def auto_fmea(
 
 #set text(size: 14pt, font: "Times New Roman")
 
-Фрагмент кода API-клиента (frontend/src/lib/api.ts)
+= Фрагмент кода API-клиента (frontend/src/lib/api.ts)
 
 #set text(size: 11pt, font: "DejaVu Sans Mono")
 ```typescript
@@ -93,7 +94,7 @@ export const api = {
 
 #set text(size: 14pt, font: "Times New Roman")
 
-Фрагмент кода генерации PDF-отчёта (report.py)
+= Фрагмент кода генерации PDF-отчёта (report.py)
 
 #set text(size: 11pt, font: "DejaVu Sans Mono")
 ```python
@@ -130,3 +131,15 @@ def generate_full_report(
     doc.build(elements)
     return buffer.getvalue()
 ```
+
+#set text(size: 14pt, font: "Times New Roman")
+
+= Ссылка на репозиторий проекта
+
+#align(center)[
+  #image("qr-repo.png", width: 40%)
+]
+
+#align(center)[
+  Репозиторий проекта: #link("https://github.com/Ah3ron/diplom4")
+]

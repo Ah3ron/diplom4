@@ -1,7 +1,7 @@
 // main.typ — Точка входа дипломного проекта
 // Компиляция: typst compile docs/main.typ docs/diploma.pdf --root .
 
-#import "@preview/modern-g7-32:0.2.0": abstract, appendix-heading, appendixes, gost
+#import "@preview/modern-g7-32:0.2.0": enum-numbering, gost
 
 #import "@preview/pintorita:0.1.4"
 #show raw.where(lang: "pintora"): it => pintorita.render(it.text, style: "default")
@@ -10,28 +10,24 @@
   hide-title: true,
 )
 
-// ── Нумерация глав: «ГЛАВА 1» + название по центру ──────────────
-#show heading.where(level: 1): it => {
+#show heading.where(level: 1): it => context {
   if it.numbering != none {
-    context {
-      let n = counter(heading).get().first()
-      pagebreak(weak: true)
-      align(center)[
-        #text(weight: "bold", size: 14pt)[ГЛАВА #n]
-        #linebreak()
-        #text(weight: "bold", size: 14pt)[#it.body]
-      ]
-    }
-  } else {
     pagebreak(weak: true)
-    align(center, text(weight: "bold", size: 14pt, upper(it.body)))
+    align(center, text(
+      weight: "bold",
+      size: 14pt,
+    )[ГЛАВА #numbering(it.numbering, ..counter(heading).at(it.location()))])
+    align(center, text(
+      weight: "bold",
+      size: 14pt,
+    )[#upper(it.body)])
+  } else {
+    it
   }
 }
 
-// show raw/code blocks in figures as Рисунок not Листинг
 #show figure.where(kind: raw): set figure(supplement: [Рисунок])
 
-// Нумерация рисунков: Рисунок 2.2 (глава.номер_в_главе)
 #set figure(numbering: n => {
   context {
     let ch = counter(heading).get()
@@ -44,11 +40,14 @@
   }
 })
 
-// ── Оглавление: «ГЛАВА 1  НАЗВАНИЕ .... страница» ──────────────
-// Структурные разделы — капсом
 #show outline.entry.where(level: 1): it => {
   let in-appendix = state("appendixes", false).at(it.element.location())
-  if it.element.numbering != none and not in-appendix {
+  if in-appendix {
+    link(it.element.location(), it.indented(
+      none,
+      [ПРИЛОЖЕНИЕ #it.prefix()] + sym.space + box(width: 1fr, it.fill) + sym.space + it.page(),
+    ))
+  } else if it.element.numbering != none and not in-appendix {
     link(it.element.location(), it.indented(
       none,
       [ГЛАВА #it.prefix()] + sym.space + it.element.body + sym.space + box(width: 1fr, it.fill) + it.page(),
@@ -63,58 +62,88 @@
   }
 }
 
-#abstract(
-  "оценка рисков",
-  "FMEA",
-  "анализ Пуассона",
-  "тренд-анализ",
-  "программный модуль",
-  "статистические модели",
-  "FastAPI",
-  "React",
-)[
-  Дипломный проект: 65 страниц, 18 рисунков, 13 таблиц, 29 источников, 4 приложения.
-
-  Ключевые слова: оценка рисков, FMEA, анализ Пуассона, тренд-анализ, программный модуль, статистические модели, база данных, веб-приложение, FastAPI, React.
-
-  Объект исследования — производственные риски ЗАО «Солигорский институт проблем ресурсосбережения с опытным производством».
-
-  Предмет исследования — методы и программные средства оценки производственных рисков на основе статистических моделей.
-
-  Цель работы — разработка программного модуля оценки производственных рисков на основе статистических моделей (описательная статистика, тренд-анализ с прогнозом, анализ Пуассона, FMEA-анализ). Программный модуль реализован по клиент-серверной архитектуре: серверная часть на Python 3.13 + FastAPI, клиентская на React 19 + TypeScript. База данных — SQLite через SQLAlchemy ORM.
-]
-
-#outline(title: [Оглавление])
-
-// ── Перечень условных обозначений ──────────────────────────────
+#include "abstract.typ"
+#outline(title: align(center)[#upper([Оглавление])])
 #include "abbreviations.typ"
-
-// ── Введение ───────────────────────────────────────────────────
 #include "introduction.typ"
-
-// ── Глава 1 ────────────────────────────────────────────────────
 #include "chapter1.typ"
-
-// ── Глава 2 ────────────────────────────────────────────────────
 #include "chapter2.typ"
-
-// ── Глава 3 ────────────────────────────────────────────────────
 #include "chapter3.typ"
-
-// ── Глава 4 ────────────────────────────────────────────────────
 #include "chapter4.typ"
-
-// ── Глава 5 ────────────────────────────────────────────────────
 #include "chapter5.typ"
-
-// ── Заключение ─────────────────────────────────────────────────
 #include "conclusion.typ"
-
-// ── Список использованных источников ───────────────────────────
 #bibliography("refs.bib")
 
-// ── Приложения ─────────────────────────────────────────────────
-#show: appendixes
+#let _appendix-numbering(..nums) = {
+  let alphabet = (
+    "А",
+    "Б",
+    "В",
+    "Г",
+    "Д",
+    "Е",
+    "Ж",
+    "З",
+    "И",
+    "К",
+    "Л",
+    "М",
+    "Н",
+    "О",
+    "П",
+    "Р",
+    "С",
+    "Т",
+    "У",
+    "Ф",
+    "Х",
+    "Ц",
+    "Ч",
+    "Ш",
+    "Щ",
+    "Э",
+    "Ю",
+    "Я",
+  )
+  alphabet.at(nums.pos().first() - 1)
+}
+
+#let my-appendixes(body) = {
+  set heading(numbering: _appendix-numbering, hanging-indent: 0pt)
+
+  show heading.where(level: 1): it => context {
+    counter(figure.where(kind: image)).update(0)
+    counter(figure.where(kind: table)).update(0)
+    counter(figure.where(kind: raw)).update(0)
+    counter(math.equation).update(0)
+    pagebreak(weak: true)
+    align(right, text(
+      weight: "bold",
+      size: 14pt,
+    )[ПРИЛОЖЕНИЕ #numbering(it.numbering, ..counter(heading).at(it.location()))])
+    v(0.3em)
+    align(center, text(weight: "bold", size: 14pt)[#it.body])
+    v(0.8em)
+  }
+
+  set figure(numbering: n => {
+    context {
+      let ch = counter(heading).get()
+      if ch.len() > 0 {
+        let ch-num = ch.first()
+        [#_appendix-numbering(ch-num).#n]
+      } else {
+        [#n]
+      }
+    }
+  })
+
+  state("appendixes").update(true)
+  counter(heading).update(0)
+  body
+}
+
+#show: my-appendixes
 #include "appendix.typ"
 
 
