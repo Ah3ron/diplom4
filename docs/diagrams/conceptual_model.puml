@@ -1,0 +1,34 @@
+@startuml
+skinparam dpi 150
+skinparam shadowing false
+
+entity "ПОДРАЗДЕЛЕНИЕ" as dept {
+}
+
+entity "ИНЦИДЕНТ" as inc {
+}
+
+entity "ОТКАЗ_ОБОРУДОВАНИЯ" as fail {
+}
+
+entity "НАРУШЕНИЕ_ТБ" as viol {
+}
+
+entity "МЕДОСМОТР" as med {
+}
+
+entity "ОЦЕНКА_РИСКА" as risk {
+}
+
+dept ||--o{ inc : "имеет"
+dept ||--o{ fail : "эксплуатирует"
+dept ||--o{ viol : "допускает"
+dept ||--o{ med : "организует"
+inc }o--o{ fail : "причина"
+inc }o--o{ viol : "коррелирует"
+inc }o--o{ med : "анализ"
+inc }o--o{ risk : "оценивается"
+fail }o--o{ risk : "оценивается"
+viol }o--o{ risk : "оценивается"
+med }o--o{ risk : "оценивается"
+@enduml

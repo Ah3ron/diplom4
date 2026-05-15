@@ -1,7 +1,5 @@
 = МОДЕЛИРОВАНИЕ И ПРОЕКТИРОВАНИЕ ПРОГРАММНОЙ СИСТЕМЫ
 
-#import "@preview/pintorita:0.1.4"
-
 == Разработка концептуальной модели данных
 
 Концептуальная модель данных представляет собой абстрактное описание предметной области, отражающее основные сущности и связи между ними без учёта особенностей конкретной системы управления базами данных @stamatis2003.
@@ -33,26 +31,7 @@ _Оценка риска_ — результат проведения анали
 На рисунке @fig:conceptual_model приведена концептуальная модель данных в нотации ER-диаграммы.
 
 #figure(
-  ```pintora
-  erDiagram
-    ПОДРАЗДЕЛЕНИЕ
-    ИНЦИДЕНТ
-    ОТКАЗ_ОБОРУДОВАНИЯ
-    НАРУШЕНИЕ_ТБ
-    МЕДОСМОТР
-    ОЦЕНКА_РИСКА
-    ПОДРАЗДЕЛЕНИЕ ||--o{ ИНЦИДЕНТ : "имеет"
-    ПОДРАЗДЕЛЕНИЕ ||--o{ ОТКАЗ_ОБОРУДОВАНИЯ : "эксплуатирует"
-    ПОДРАЗДЕЛЕНИЕ ||--o{ НАРУШЕНИЕ_ТБ : "допускает"
-    ПОДРАЗДЕЛЕНИЕ ||--o{ МЕДОСМОТР : "организует"
-    ИНЦИДЕНТ }o--o{ ОТКАЗ_ОБОРУДОВАНИЯ : "причина"
-    ИНЦИДЕНТ }o--o{ НАРУШЕНИЕ_ТБ : "коррелирует"
-    ИНЦИДЕНТ }o--o{ МЕДОСМОТР : "анализ"
-    ИНЦИДЕНТ }o--o{ ОЦЕНКА_РИСКА : "оценивается"
-    ОТКАЗ_ОБОРУДОВАНИЯ }o--o{ ОЦЕНКА_РИСКА : "оценивается"
-    НАРУШЕНИЕ_ТБ }o--o{ ОЦЕНКА_РИСКА : "оценивается"
-    МЕДОСМОТР }o--o{ ОЦЕНКА_РИСКА : "оценивается"
-  ```,
+  image("diagrams/conceptual_model.png", width: 100%),
   caption: [Концептуальная модель данных],
 ) <fig:conceptual_model>
 
@@ -108,78 +87,7 @@ _Оценка риска_ — результат проведения анали
 На рисунке @fig:logical_model приведена логическая модель базы данных в нотации ER-диаграммы.
 
 #figure(
-  ```pintora
-   classDiagram
-  class ПОДРАЗДЕЛЕНИЯ {
-  идентификатор
-  наименование
-  тип
-  }
-
-  class ИНЦИДЕНТЫ {
-  идентификатор
-  дата
-  идентификатор_отдела
-  тип_инцидента
-  уровень_тяжести
-  потерянные_дни
-  описание
-  }
-
-  class ОТКАЗЫ_ОБОРУДОВАНИЯ {
-  идентификатор
-  дата
-  идентификатор_отдела
-  тип_оборудования
-  наименование
-  наработка
-  время_простоя
-  причина_отказа
-  стоимость_ремонта
-  }
-
-  class НАРУШЕНИЯ_ТБ {
-  идентификатор
-  дата
-  идентификатор_отдела
-  тип_нарушения
-  выявлено_при_аудите
-  ответственный
-  }
-
-  class МЕДОСМОТРЫ {
-  идентификатор
-  дата
-  профессия
-  идентификатор_отдела
-  результаты
-  категория_заболевания
-  }
-
-  class ОЦЕНКИ_РИСКОВ {
-  идентификатор
-  метод
-  наименование
-  входные_параметры
-  результат
-  дата_проведения
-  автор
-  }
-
-  ПОДРАЗДЕЛЕНИЯ --> ИНЦИДЕНТЫ
-  ПОДРАЗДЕЛЕНИЯ --> ОТКАЗЫ_ОБОРУДОВАНИЯ
-  ПОДРАЗДЕЛЕНИЯ --> НАРУШЕНИЯ_ТБ
-  ПОДРАЗДЕЛЕНИЯ --> МЕДОСМОТРЫ
-
-  ИНЦИДЕНТЫ --> ОТКАЗЫ_ОБОРУДОВАНИЯ
-  ИНЦИДЕНТЫ --> НАРУШЕНИЯ_ТБ
-  ИНЦИДЕНТЫ --> МЕДОСМОТРЫ
-
-  ИНЦИДЕНТЫ --> ОЦЕНКИ_РИСКОВ
-  ОТКАЗЫ_ОБОРУДОВАНИЯ --> ОЦЕНКИ_РИСКОВ
-  НАРУШЕНИЯ_ТБ --> ОЦЕНКИ_РИСКОВ
-  МЕДОСМОТРЫ --> ОЦЕНКИ_РИСКОВ
-  ```,
+  image("diagrams/logical_model.png", width: 100%),
   caption: [Логическая модель базы данных],
 ) <fig:logical_model>
 
@@ -290,70 +198,7 @@ _Оценка риска_ — результат проведения анали
 На рисунке @fig:physical_model приведена физическая модель базы данных.
 
 #figure(
-  ```pintora
-  erDiagram
-    DEPARTMENTS {
-      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
-      TEXT name "NOT NULL"
-      TEXT type "TEXT"
-    }
-    INCIDENTS {
-      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
-      TEXT date "NOT NULL"
-      INTEGER department_id FK "REFERENCES DEPARTMENTS(id)"
-      TEXT incident_type "TEXT"
-      TEXT severity "TEXT"
-      INTEGER days_lost "DEFAULT 0"
-      TEXT description "TEXT"
-    }
-    EQUIPMENT_FAILURES {
-      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
-      TEXT date "NOT NULL"
-      INTEGER department_id FK "REFERENCES DEPARTMENTS(id)"
-      TEXT equipment_type "TEXT"
-      TEXT equipment_name "TEXT"
-      REAL operating_hours "DEFAULT 0"
-      REAL downtime_hours "DEFAULT 0"
-      TEXT failure_cause "TEXT"
-      REAL repair_cost "DEFAULT 0"
-    }
-    SAFETY_VIOLATIONS {
-      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
-      TEXT date "NOT NULL"
-      INTEGER department_id FK "REFERENCES DEPARTMENTS(id)"
-      TEXT violation_type "TEXT"
-      INTEGER is_audit_finding "DEFAULT 0"
-      TEXT responsible "TEXT"
-    }
-    MEDICAL_EXAMS {
-      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
-      TEXT date "NOT NULL"
-      TEXT profession "TEXT"
-      INTEGER department_id FK "REFERENCES DEPARTMENTS(id)"
-      TEXT findings "TEXT"
-      TEXT disease_category "TEXT"
-    }
-    RISK_ASSESSMENTS {
-      INTEGER id PK "PRIMARY KEY AUTOINCREMENT"
-      TEXT method "NOT NULL"
-      TEXT name "NOT NULL"
-      TEXT input_params "TEXT"
-      TEXT result "TEXT"
-      TEXT created_at "DEFAULT CURRENT_TIMESTAMP"
-      TEXT author "TEXT"
-    }
-    DEPARTMENTS ||--o{ INCIDENTS : "FK"
-    DEPARTMENTS ||--o{ EQUIPMENT_FAILURES : "FK"
-    DEPARTMENTS ||--o{ SAFETY_VIOLATIONS : "FK"
-    DEPARTMENTS ||--o{ MEDICAL_EXAMS : "FK"
-    INCIDENTS }o--o{ EQUIPMENT_FAILURES : "N:M"
-    INCIDENTS }o--o{ SAFETY_VIOLATIONS : "N:M"
-    INCIDENTS }o--o{ MEDICAL_EXAMS : "N:M"
-    INCIDENTS ||--o{ RISK_ASSESSMENTS : "1:N"
-    EQUIPMENT_FAILURES ||--o{ RISK_ASSESSMENTS : "1:N"
-    SAFETY_VIOLATIONS ||--o{ RISK_ASSESSMENTS : "1:N"
-    MEDICAL_EXAMS ||--o{ RISK_ASSESSMENTS : "1:N"
-  ```,
+  image("diagrams/physical_model.png", width: 100%),
   caption: [Физическая модель базы данных (SQLite)],
 ) <fig:physical_model>
 

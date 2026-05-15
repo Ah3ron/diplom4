@@ -1,0 +1,78 @@
+@startuml
+skinparam dpi 150
+skinparam shadowing false
+
+entity "DEPARTMENTS" as dept {
+  * id : INTEGER <<PK>>
+  --
+  * name : TEXT <<NOT NULL>>
+  type : TEXT
+}
+
+entity "INCIDENTS" as inc {
+  * id : INTEGER <<PK>>
+  --
+  * date : TEXT <<NOT NULL>>
+  department_id : INTEGER <<FK>>
+  incident_type : TEXT
+  severity : TEXT
+  days_lost : INTEGER <<DEFAULT 0>>
+  description : TEXT
+}
+
+entity "EQUIPMENT_FAILURES" as fail {
+  * id : INTEGER <<PK>>
+  --
+  * date : TEXT <<NOT NULL>>
+  department_id : INTEGER <<FK>>
+  equipment_type : TEXT
+  equipment_name : TEXT
+  operating_hours : REAL <<DEFAULT 0>>
+  downtime_hours : REAL <<DEFAULT 0>>
+  failure_cause : TEXT
+  repair_cost : REAL <<DEFAULT 0>>
+}
+
+entity "SAFETY_VIOLATIONS" as viol {
+  * id : INTEGER <<PK>>
+  --
+  * date : TEXT <<NOT NULL>>
+  department_id : INTEGER <<FK>>
+  violation_type : TEXT
+  is_audit_finding : INTEGER <<DEFAULT 0>>
+  responsible : TEXT
+}
+
+entity "MEDICAL_EXAMS" as med {
+  * id : INTEGER <<PK>>
+  --
+  * date : TEXT <<NOT NULL>>
+  profession : TEXT
+  department_id : INTEGER <<FK>>
+  findings : TEXT
+  disease_category : TEXT
+}
+
+entity "RISK_ASSESSMENTS" as risk {
+  * id : INTEGER <<PK>>
+  --
+  * method : TEXT <<NOT NULL>>
+  * name : TEXT <<NOT NULL>>
+  input_params : TEXT
+  result : TEXT
+  created_at : TEXT <<CURRENT_TIMESTAMP>>
+  author : TEXT
+}
+
+dept ||--o{ inc : "FK"
+dept ||--o{ fail : "FK"
+dept ||--o{ viol : "FK"
+dept ||--o{ med : "FK"
+inc }o--o{ fail : "N:M"
+inc }o--o{ viol : "N:M"
+inc }o--o{ med : "N:M"
+inc ||--o{ risk : "1:N"
+fail ||--o{ risk : "1:N"
+viol ||--o{ risk : "1:N"
+med ||--o{ risk : "1:N"
+@enduml
