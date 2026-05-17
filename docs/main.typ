@@ -9,7 +9,7 @@
 #include "abstract.typ"
 #pagebreak()
 
-#structural-heading("СОДЕРЖАНИЕ")
+#heading(level: 1, numbering: none, outlined: false)[СОДЕРЖАНИЕ]
 #outline(title: none, indent: auto, depth: 3)
 #pagebreak()
 

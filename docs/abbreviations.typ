@@ -1,5 +1,5 @@
 #import "template.typ": structural-heading
-#structural-heading("ПЕРЕЧЕНЬ СОКРАЩЕНИЙ И ОБОЗНАЧЕНИЙ")
+#heading(level: 1, numbering: none, outlined: false)[ПЕРЕЧЕНЬ СОКРАЩЕНИЙ И ОБОЗНАЧЕНИЙ]
 
 // abbreviations.typ
 

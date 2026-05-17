@@ -1,6 +1,6 @@
 #import "template.typ": structural-heading
 
-#structural-heading("РЕФЕРАТ")
+#heading(level: 1, numbering: none, outlined: false)[РЕФЕРАТ]
 
 Дипломный проект: 65 с., 18 рис., 13 табл., 29 источников, 4 приложения.
 
