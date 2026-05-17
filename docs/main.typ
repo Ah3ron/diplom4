@@ -1,4 +1,4 @@
-#import "template.typ": template, structural-heading, start-page-numbering, start-appendixes
+#import "template.typ": start-appendixes, start-page-numbering, structural-heading, template
 
 #show: template
 
@@ -8,6 +8,7 @@
 #start-page-numbering()
 
 #structural-heading("СОДЕРЖАНИЕ")
+
 #outline(title: none, indent: auto, depth: 3)
 
 #pagebreak()
@@ -28,8 +29,7 @@
 #include "conclusion.typ"
 #pagebreak()
 #structural-heading("СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ")
-#set bibliography(title: none)
-#bibliography("refs.bib", style: "gb-7714-2015-numeric")
+#include "bibliography.typ"
 
 #show: start-appendixes
 #include "appendix.typ"

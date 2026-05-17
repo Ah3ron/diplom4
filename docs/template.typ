@@ -66,6 +66,10 @@
   set footnote.entry(separator: line(length: 30mm, stroke: 0.5pt))
   show footnote.entry: set text(size: 10pt)
 
+  set list(marker: [-], indent: 1.25cm, body-indent: 0.5em, spacing: 0.4em)
+
+  set enum(indent: 1.25cm, body-indent: 0.5em, spacing: 0.4em)
+
   show figure.where(kind: image): set figure(supplement: [Рисунок])
   show figure.where(kind: raw): set figure(supplement: [Рисунок])
 
@@ -116,14 +120,15 @@
   // === Заголовки уровня 1 ===
   // С нумерацией → «ГЛАВА N» + название (прописными)
   // Без нумерации → структурный элемент (по центру)
+  show heading: set text(weight: "regular")
   show heading.where(level: 1): it => context {
     if it.numbering != none {
       pagebreak(weak: true)
       let heading-num = numbering(it.numbering, ..counter(heading).at(it.location()))
-      align(center, text(weight: "bold", size: 14pt)[ГЛАВА #heading-num])
-      align(center, text(weight: "bold", size: 14pt)[#upper(it.body)])
+      align(center, text(size: 14pt)[ГЛАВА #heading-num])
+      align(center, text(size: 14pt)[#upper(it.body)])
     } else {
-      align(center, text(weight: "bold", size: 14pt)[#it.body])
+      align(center, text(size: 14pt)[#it.body])
     }
     v(14pt)
   }
@@ -131,7 +136,7 @@
   // === Заголовки уровня 2 ===
   show heading.where(level: 2): it => {
     v(28pt)
-    text(weight: "bold", size: 14pt)[#{
+    text(size: 14pt)[#{
       context counter(heading).display()
       h(0.3em)
       it.body
@@ -142,27 +147,21 @@
   // === Заголовки уровня 3 ===
   show heading.where(level: 3): it => {
     v(28pt)
-    text(weight: "bold", size: 14pt)[#{
+    text(size: 14pt)[#{
       context counter(heading).display()
       h(0.3em)
       it.body
     }]
     v(14pt)
   }
-
+  show outline.entry: set block(below: 0.15em)
   // === Оглавление — кастомные записи для глав и приложений ===
   show outline.entry.where(level: 1): it => context {
     let in-app = state("appendix-active", false).at(it.element.location())
     if in-app {
       link(it.element.location(), it.indented(
         none,
-        [ПРИЛОЖЕНИЕ #it.prefix()]
-          + sym.space
-          + it.element.body
-          + sym.space
-          + box(width: 1fr, it.fill)
-          + sym.space
-          + it.page(),
+        [ПРИЛОЖЕНИЕ #it.prefix()] + linebreak() + it.element.body + sym.space + box(width: 1fr, it.fill) + it.page(),
       ))
     } else if it.element.numbering != none {
       link(it.element.location(), it.indented(
@@ -201,9 +200,9 @@
     counter(math.equation).update(0)
     pagebreak(weak: true)
     let heading-num = numbering(it.numbering, ..counter(heading).at(it.location()))
-    align(right, text(weight: "bold", size: 14pt)[ПРИЛОЖЕНИЕ #heading-num])
+    align(right, text(size: 14pt)[ПРИЛОЖЕНИЕ #heading-num])
     v(0.3em)
-    align(center, text(weight: "bold", size: 14pt)[#it.body])
+    align(center, text(size: 14pt)[#it.body])
     v(0.8em)
   }
 

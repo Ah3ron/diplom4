@@ -1,5 +1,6 @@
 #import "template.typ": structural-heading
-#structural-heading("Перечень сокращений и обозначений")
+#structural-heading("ПЕРЕЧЕНЬ СОКРАЩЕНИЙ И ОБОЗНАЧЕНИЙ")
+
 // abbreviations.typ
 
 #set par(first-line-indent: 0cm)
