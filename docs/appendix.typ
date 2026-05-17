@@ -1,7 +1,8 @@
 = Фрагмент кода автоматического FMEA-анализа
 
-#set text(size: 11pt, font: "DejaVu Sans Mono")
-```python
+#{
+  set text(size: 11pt, font: "DejaVu Sans Mono")
+  ```python
 async def auto_fmea(
     db: AsyncSession,
     department: str | None = None,
@@ -47,14 +48,14 @@ async def auto_fmea(
 
     items.sort(key=lambda x: x["rpn"], reverse=True)
     return {"items": items, "analysis_name": analysis_name}
-```
-
-#set text(size: 14pt, font: "Times New Roman")
+  ```
+}
 
 = Фрагмент кода API-клиента (frontend/src/lib/api.ts)
 
-#set text(size: 11pt, font: "DejaVu Sans Mono")
-```typescript
+#{
+  set text(size: 11pt, font: "DejaVu Sans Mono")
+  ```typescript
 const API_BASE = "http://localhost:8000/api"
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -90,14 +91,14 @@ export const api = {
     dashboard: () => request<any>("/statistics/dashboard"),
   },
 }
-```
-
-#set text(size: 14pt, font: "Times New Roman")
+  ```
+}
 
 = Фрагмент кода генерации PDF-отчёта (report.py)
 
-#set text(size: 11pt, font: "DejaVu Sans Mono")
-```python
+#{
+  set text(size: 11pt, font: "DejaVu Sans Mono")
+  ```python
 FONTS = {
     "TNR": "/usr/share/fonts/TTF/times.ttf",
     "TNR-B": "/usr/share/fonts/TTF/timesbd.ttf",
@@ -130,9 +131,8 @@ def generate_full_report(
     doc = _PageTracker(buffer, pagesize=A4, ...)
     doc.build(elements)
     return buffer.getvalue()
-```
-
-#set text(size: 14pt, font: "Times New Roman")
+  ```
+}
 
 = Ссылка на репозиторий проекта
 
