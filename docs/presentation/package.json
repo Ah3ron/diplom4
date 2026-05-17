@@ -1,0 +1,20 @@
+{
+  "name": "diploma-defense-presentation",
+  "private": true,
+  "scripts": {
+    "dev": "slidev --open",
+    "build": "slidev build",
+    "export": "slidev export"
+  },
+  "dependencies": {
+    "@slidev/cli": "^52.0.0",
+    "@slidev/theme-default": "^0.25.0",
+    "@slidev/theme-seriph": "^0.25.0",
+    "slidev-theme-eloc": "^1.1.0",
+    "slidev-theme-geist": "^0.8.1",
+    "slidev-theme-zhozhoba": "^1.0.0"
+  },
+  "devDependencies": {
+    "playwright-chromium": "^1.60.0"
+  }
+}
