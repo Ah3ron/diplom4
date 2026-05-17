@@ -1,5 +1,7 @@
-#set par(first-line-indent: (amount: 1.25cm))
-#set block(spacing: 0.4em)
+#import "template.typ": structural-heading
+
+#structural-heading("СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ")
+
 
 \1. FastAPI: Modern, fast web framework for building APIs with Python [Электронный ресурс] / Sebastián Ramírez. – 2024. – Режим доступа: https://fastapi.tiangolo.com/ (дата обращения: 20.01.2025).
 

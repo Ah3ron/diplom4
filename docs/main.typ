@@ -2,16 +2,19 @@
 
 #show: template
 
-#include "abstract.typ"
+#for i in range(1, 3) [
+  #pagebreak()
+]
 
+#include "abstract.typ"
 #pagebreak()
-#start-page-numbering()
 
 #structural-heading("СОДЕРЖАНИЕ")
-
 #outline(title: none, indent: auto, depth: 3)
-
 #pagebreak()
+
+
+#start-page-numbering()
 #include "abbreviations.typ"
 #pagebreak()
 #include "introduction.typ"
@@ -28,7 +31,6 @@
 #pagebreak()
 #include "conclusion.typ"
 #pagebreak()
-#structural-heading("СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ")
 #include "bibliography.typ"
 
 #show: start-appendixes
