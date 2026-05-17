@@ -5,9 +5,34 @@
 
 #let appendix-numbering(..nums) = {
   let alphabet = (
-    "А", "Б", "В", "Г", "Д", "Е", "Ж", "З", "И", "К",
-    "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф",
-    "Х", "Ц", "Ч", "Ш", "Щ", "Э", "Ю", "Я",
+    "А",
+    "Б",
+    "В",
+    "Г",
+    "Д",
+    "Е",
+    "Ж",
+    "З",
+    "И",
+    "К",
+    "Л",
+    "М",
+    "Н",
+    "О",
+    "П",
+    "Р",
+    "С",
+    "Т",
+    "У",
+    "Ф",
+    "Х",
+    "Ц",
+    "Ч",
+    "Ш",
+    "Щ",
+    "Э",
+    "Ю",
+    "Я",
   )
   alphabet.at(nums.pos().first() - 1)
 }
@@ -41,14 +66,45 @@
   set footnote.entry(separator: line(length: 30mm, stroke: 0.5pt))
   show footnote.entry: set text(size: 10pt)
 
-  // Pintora / raw-блоки внутри figure → «Рисунок»
+  show figure.where(kind: image): set figure(supplement: [Рисунок])
   show figure.where(kind: raw): set figure(supplement: [Рисунок])
 
-  // Нумерация формул: (1), (2), ...
-  set math.equation(numbering: "(1)")
+  show figure.where(kind: table): set figure(supplement: none, numbering: n => context {
+    let ch = counter(heading).get()
+    if ch.len() > 0 {
+      [#ch.first().#n]
+    } else {
+      [#n]
+    }
+  })
+  show figure.where(kind: table): it => context {
+    set text(size: 12pt)
+    set par(first-line-indent: (amount: 1.25cm))
+    v(8pt)
+    align(left, [Таблица #it.counter.display() – #it.caption.body])
+    it.body
+  }
 
-  // Нумерация рисунков/таблиц с префиксом главы (1.1, 2.3, ...)
-  set figure(numbering: n => context {
+  // Нумерация формул: (1.1), (2.3), ...
+  set math.equation(numbering: n => context {
+    let ch = counter(heading).get()
+    if ch.len() > 0 {
+      [(#ch.first().#n)]
+    } else {
+      [(#n)]
+    }
+  })
+
+  // Нумерация рисунков с префиксом главы (1.1, 2.3, ...)
+  show figure.where(kind: image): set figure(numbering: n => context {
+    let ch = counter(heading).get()
+    if ch.len() > 0 {
+      [#ch.first().#n]
+    } else {
+      [#n]
+    }
+  })
+  show figure.where(kind: raw): set figure(numbering: n => context {
     let ch = counter(heading).get()
     if ch.len() > 0 {
       [#ch.first().#n]
@@ -100,7 +156,13 @@
     if in-app {
       link(it.element.location(), it.indented(
         none,
-        [ПРИЛОЖЕНИЕ #it.prefix()] + sym.space + it.element.body + sym.space + box(width: 1fr, it.fill) + sym.space + it.page(),
+        [ПРИЛОЖЕНИЕ #it.prefix()]
+          + sym.space
+          + it.element.body
+          + sym.space
+          + box(width: 1fr, it.fill)
+          + sym.space
+          + it.page(),
       ))
     } else if it.element.numbering != none {
       link(it.element.location(), it.indented(

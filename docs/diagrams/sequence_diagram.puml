@@ -1,9 +1,10 @@
 @startuml
-actor "Специалист по ОТ" as User
-boundary "Веб-интерфейс" as UI
-control "REST API" as API
-boundary "Сервис статистики" as StatSvc
-database "База данных" as DB
+skinparam participantStyle rectangle
+participant "Специалист по ОТ" as User
+participant "Веб-интерфейс" as UI
+participant "REST API" as API
+participant "Сервис статистики" as StatSvc
+participant "База данных" as DB
 
 == Загрузка данных ==
 User -> UI: Загрузка данных из файла
