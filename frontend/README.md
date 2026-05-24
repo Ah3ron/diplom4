@@ -1,21 +1,18 @@
-# React + TypeScript + Vite + shadcn/ui
+# Frontend — Оценка производственных рисков
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+React 19 + TypeScript + shadcn/ui + recharts.
 
-## Adding components
+## Запуск
 
-To add components to your app, run the following command:
+```bash
+npm install
+npm run dev
+```
+
+## Компоненты
+
+Для добавления UI-компонентов:
 
 ```bash
 npx shadcn@latest add button
-```
-
-This will place the ui components in the `src/components` directory.
-
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button"
 ```

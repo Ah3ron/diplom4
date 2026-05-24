@@ -31,6 +31,7 @@ import {
   Legend,
   Area,
   ComposedChart,
+  Label,
 } from "recharts"
 
 const CHART_COLORS = ["#2563eb", "#dc2626", "#16a34a", "#ea580c", "#7c3aed"]
@@ -109,6 +110,10 @@ function DescriptiveStats() {
             <StatCard label="75-й перцентиль" value={stats.q75?.toFixed(2)} />
           </div>
         )}
+        <div className="text-xs text-muted-foreground mt-2 space-y-1 px-2">
+          <p>x̄ — среднее арифметическое, σ — стандартное отклонение (СКО)</p>
+          <p>Q1, Q3 — первый и третий квартили (25-й и 75-й перцентили)</p>
+        </div>
       </CardContent>
     </Card>
   )
@@ -228,19 +233,23 @@ function TrendAnalysis() {
         {!loading && chartData.length > 0 && (
           <>
             <ResponsiveContainer width="100%" height={360}>
-              <ComposedChart data={chartData}>
+              <ComposedChart data={chartData} margin={{ top: 5, right: 20, bottom: 25, left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="period" tick={{ fontSize: 11 }} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
+                <XAxis dataKey="period" tick={{ fontSize: 11 }}>
+                  <Label value="Период" offset={-5} position="insideBottom" />
+                </XAxis>
+                <YAxis>
+                  <Label value="Количество" angle={-90} offset={15} position="insideLeft" style={{ textAnchor: 'middle' }} />
+                </YAxis>
+                <Tooltip formatter={(v: number, n: string) => [v.toFixed(1), n]} labelFormatter={(l) => `Период: ${l}`} />
+                <Legend wrapperStyle={{ paddingTop: 8 }} />
                 <Area
                   type="monotone"
                   dataKey="ci_upper"
                   stroke="none"
                   fill="#7c3aed"
                   fillOpacity={0.12}
-                  name="95% ДИ"
+                  name="95% доверительный интервал"
                   dot={false}
                   activeDot={false}
                 />
@@ -267,7 +276,7 @@ function TrendAnalysis() {
                 <Line
                   type="monotone"
                   dataKey="trend_line"
-                  name="Тренд"
+                  name="Линия тренда"
                   stroke={CHART_COLORS[1]}
                   strokeDasharray="5 5"
                   strokeWidth={2}
@@ -311,6 +320,11 @@ function TrendAnalysis() {
                 )}
               </div>
             )}
+            <div className="text-xs text-muted-foreground mt-2 space-y-1 px-2">
+              <p>Линейная регрессия: y = ax + b, где a — наклон (тенденция), b — смещение</p>
+              <p>R² — коэффициент детерминации (доля объяснённой дисперсии, 0–1)</p>
+              <p>Серая область — 95%-ный доверительный интервал прогноза</p>
+            </div>
           </>
         )}
       </CardContent>
@@ -442,42 +456,57 @@ function PoissonAnalysis() {
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               {distData.length > 0 && (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={distData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="events" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
-                      dataKey="probability"
-                      name="Вероятность (%)"
-                      fill={CHART_COLORS[0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div>
+                  <h3 className="mb-2 text-sm font-medium">Распределение вероятностей P(X=k)</h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={distData} margin={{ top: 5, right: 20, bottom: 25, left: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="events">
+                        <Label value="Число событий (k)" offset={-5} position="insideBottom" />
+                      </XAxis>
+                      <YAxis>
+                        <Label value="P(X=k), %" angle={-90} offset={15} position="insideLeft" style={{ textAnchor: 'middle' }} />
+                      </YAxis>
+                      <Tooltip formatter={(v: number) => [v.toFixed(4), "Вероятность"]} labelFormatter={(l) => `k = ${l}`} />
+                      <Legend wrapperStyle={{ paddingTop: 8 }} />
+                      <Bar
+                        dataKey="probability"
+                        name="Вероятность (%)"
+                        fill={CHART_COLORS[0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               )}
 
               {result.event_counts?.length > 0 && (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={result.period_labels.map((l: string, i: number) => ({
-                      period: l,
-                      count: result.event_counts[i],
-                    }))}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="period" tick={{ fontSize: 10 }} />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar
-                      dataKey="count"
-                      name="Событий за период"
-                      fill={CHART_COLORS[1]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div>
+                  <h3 className="mb-2 text-sm font-medium">События по периодам</h3>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                      data={result.period_labels.map((l: string, i: number) => ({
+                        period: l,
+                        count: result.event_counts[i],
+                      }))}
+                      margin={{ top: 5, right: 20, bottom: 25, left: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="period" tick={{ fontSize: 10 }}>
+                        <Label value="Период" offset={-5} position="insideBottom" />
+                      </XAxis>
+                      <YAxis>
+                        <Label value="Количество" angle={-90} offset={15} position="insideLeft" style={{ textAnchor: 'middle' }} />
+                      </YAxis>
+                      <Tooltip formatter={(v: number) => [v, "Событий"]} />
+                      <Legend wrapperStyle={{ paddingTop: 8 }} />
+                      <Bar
+                        dataKey="count"
+                        name="Событий за период"
+                        fill={CHART_COLORS[1]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               )}
             </div>
 
@@ -488,6 +517,11 @@ function PoissonAnalysis() {
                 <strong>{result.confidence_interval[1]?.toFixed(1)}</strong>]
               </div>
             )}
+            <div className="text-xs text-muted-foreground mt-2 space-y-1 px-2">
+              <p>λ (лямбда) — оценка интенсивности событий (среднее число за период)</p>
+              <p>P(X=k) = λ^k · e^(-λ) / k! — вероятность ровно k событий</p>
+              <p>95% ДИ — доверительный интервал для числа событий</p>
+            </div>
           </>
         )}
       </CardContent>

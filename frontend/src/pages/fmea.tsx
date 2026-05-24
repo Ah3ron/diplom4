@@ -36,6 +36,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  Label,
 } from "recharts"
 
 interface FMEARow {
@@ -199,6 +200,12 @@ export function FMEAPage() {
         </CardContent>
       </Card>
 
+      {!result && (
+        <div className="text-center text-muted-foreground py-8">
+          Выберите подразделение и тип оборудования, затем нажмите «Провести FMEA-анализ»
+        </div>
+      )}
+
       {result && (
         <div className="flex flex-col gap-4">
           {result.source_stats && (
@@ -248,11 +255,13 @@ export function FMEAPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={chartData} layout="vertical">
+                  <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 20, bottom: 25, left: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
+                    <XAxis type="number">
+                      <Label value="RPN" offset={-5} position="insideBottom" />
+                    </XAxis>
                     <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={180} />
-                    <Tooltip />
+                    <Tooltip formatter={(v: number) => [v, "RPN"]} />
                     <Bar dataKey="rpn" name="RPN" radius={[0, 4, 4, 0]}>
                       {chartData.map((entry, i) => (
                         <Cell key={i} fill={rpnColor(entry.rpn)} />
@@ -309,6 +318,17 @@ export function FMEAPage() {
               </div>
             </CardContent>
           </Card>
+
+          <div className="text-xs text-muted-foreground mt-2 space-y-1 px-2">
+            <p>RPN = S × O × D — число приоритета риска (от 1 до 1000)</p>
+            <p>S — тяжесть последствий (1–10), O — частота возникновения (1–10), D — невозможность обнаружения (1–10)</p>
+            <p className="flex gap-3">
+              <span className="text-green-600">● до 40 — низкий</span>
+              <span className="text-yellow-600">● 41–100 — средний</span>
+              <span className="text-orange-600">● 101–200 — высокий</span>
+              <span className="text-red-600">● 201+ — очень высокий</span>
+            </p>
+          </div>
 
           {result.recommendations.length > 0 && (
             <Card>

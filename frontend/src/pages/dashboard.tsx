@@ -23,6 +23,7 @@ import {
   LineChart,
   Line,
   Legend,
+  Label,
 } from "recharts"
 
 const RISK_COLORS: Record<string, string> = {
@@ -75,7 +76,11 @@ export function DashboardPage() {
             <Skeleton key={i} className="h-28" />
           ))}
         </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="text-xs text-muted-foreground mt-2 px-2">
+        <p>Частота травматизма = (число инцидентов × 1000) / среднесписочная численность</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-72" />
           ))}
@@ -102,6 +107,12 @@ export function DashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-semibold">Дашборд</h1>
+
+      {data.total_incidents === 0 && data.total_equipment_failures === 0 && data.total_safety_violations === 0 && (
+        <div className="text-center text-muted-foreground py-8">
+          Данные отсутствуют. Загрузите файлы на странице «Загрузка» для отображения аналитики.
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
@@ -143,12 +154,16 @@ export function DashboardPage() {
             <CardTitle className="text-base">Несчастные случаи по отделам</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={incidentByDept}>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={incidentByDept} margin={{ top: 5, right: 20, bottom: 25, left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <YAxis />
-                <Tooltip />
+                <XAxis dataKey="name" tick={{ fontSize: 11 }}>
+                  <Label value="Подразделение" offset={-5} position="insideBottom" />
+                </XAxis>
+                <YAxis>
+                  <Label value="Количество" angle={-90} offset={15} position="insideLeft" style={{ textAnchor: 'middle' }} />
+                </YAxis>
+                <Tooltip formatter={(v: number) => [v, "Количество"]} />
                 <Bar dataKey="count" name="Количество" fill={CHART_COLORS[0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -175,7 +190,8 @@ export function DashboardPage() {
                     <Cell key={i} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip formatter={(v: number, n: string) => [`${v} случаев`, n]} />
+                <Legend wrapperStyle={{ paddingTop: 8 }} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -186,17 +202,19 @@ export function DashboardPage() {
             <CardTitle className="text-base">Отказы по типу оборудования</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={equipByType} layout="vertical">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={equipByType} layout="vertical" margin={{ top: 5, right: 20, bottom: 25, left: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
+                <XAxis type="number">
+                  <Label value="Количество" offset={-5} position="insideBottom" />
+                </XAxis>
                 <YAxis
                   dataKey="name"
                   type="category"
                   tick={{ fontSize: 11 }}
                   width={120}
                 />
-                <Tooltip />
+                <Tooltip formatter={(v: number) => [v, "Количество"]} />
                 <Bar dataKey="count" name="Количество" fill={CHART_COLORS[1]} />
               </BarChart>
             </ResponsiveContainer>
@@ -208,13 +226,17 @@ export function DashboardPage() {
             <CardTitle className="text-base">Динамика инцидентов</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={280}>
-              <LineChart data={data.monthly_trend || []}>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={data.monthly_trend || []} margin={{ top: 5, right: 20, bottom: 25, left: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }}>
+                  <Label value="Месяц" offset={-5} position="insideBottom" />
+                </XAxis>
+                <YAxis>
+                  <Label value="Инциденты" angle={-90} offset={15} position="insideLeft" style={{ textAnchor: 'middle' }} />
+                </YAxis>
+                <Tooltip formatter={(v: number) => [v, "Количество"]} labelFormatter={(l) => `Месяц: ${l}`} />
+                <Legend wrapperStyle={{ paddingTop: 8 }} />
                 <Line
                   type="monotone"
                   dataKey="count"
