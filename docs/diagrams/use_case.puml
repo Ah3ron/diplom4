@@ -1,26 +1,37 @@
 @startuml
 left to right direction
 actor Spec as "Специалист по ОТ"
+actor Eng as "Инженер по оборудованию"
 actor Ruk as "Руководитель"
 
-usecase "Загрузка данных" as UC1
+usecase "Загрузка данных об инцидентах" as UC1
+usecase "Загрузка данных об отказах" as UC1b
 usecase "Просмотр данных" as UC2
 usecase "Просмотр дашборда" as UC3
 usecase "Описательная статистика" as UC4
 usecase "Тренд-анализ" as UC5
 usecase "Анализ Пуассона" as UC6
 usecase "FMEA-анализ" as UC7
+usecase "Корреляционный анализ" as UC7b
 usecase "PDF-отчёт" as UC8
 usecase "Экспорт Excel" as UC9
 
-Spec --> UC1 
-Spec --> UC2 
-Spec --> UC4 
-Spec --> UC5 
-Spec --> UC6 
-Spec --> UC7
+Spec --> UC1
+Spec --> UC2
+Spec --> UC4
+Spec --> UC5
+Spec --> UC6
+Spec --> UC7b
 Spec --> UC8
 Spec --> UC9
+
+Eng --> UC1b
+Eng --> UC2
+Eng --> UC4
+Eng --> UC5
+Eng --> UC7
+Eng --> UC9
+
 Ruk --> UC3
 Ruk --> UC8
 @enduml

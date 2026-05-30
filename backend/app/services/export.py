@@ -82,7 +82,7 @@ def generate_incidents_excel(incidents: list[IncidentResponse]) -> bytes:
     for i, inc in enumerate(incidents, 2):
         ws.cell(row=i, column=1, value=inc.id)
         ws.cell(row=i, column=2, value=str(inc.date))
-        ws.cell(row=i, column=3, value=inc.department)
+        ws.cell(row=i, column=3, value=inc.department_name or str(inc.department_id))
         ws.cell(row=i, column=4, value=inc.incident_type)
         cell_sev = ws.cell(row=i, column=5, value=inc.severity)
         if inc.severity in severity_colors:
@@ -144,7 +144,7 @@ def generate_incidents_pdf(
     headers = ["Дата", "Цех", "Тип", "Тяжесть", "Дни"]
     data = [headers]
     for inc in incidents[:100]:
-        data.append([str(inc.date), inc.department, inc.incident_type, inc.severity, str(inc.days_lost)])
+        data.append([str(inc.date), inc.department_name or str(inc.department_id), inc.incident_type, inc.severity, str(inc.days_lost)])
 
     t = Table(data)
     t.setStyle(

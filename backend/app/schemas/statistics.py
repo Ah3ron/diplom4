@@ -36,7 +36,10 @@ class TrendResult(BaseModel):
     trend_direction: str
     slope: float
     r_squared: float
+    p_value: float = 0.0
+    intercept: float = 0.0
     moving_avg: list[float]
+    regression_line: list[float] = []
     forecast_values: list[float]
     forecast_labels: list[str]
     forecast_lower: list[float]

@@ -153,6 +153,65 @@ h1 {
 
 ---
 
+# Обоснование входных данных
+
+<div class="text-xs">
+
+| Поле | Нормативная база | Метод анализа |
+| --- | --- | --- |
+| date | СТБ ISO 45001 — хронорегистрация | Тренд, Пуассон, группировка |
+| department_id | ГОСТ 12.0.230 — учёт по подразделениям | Фильтрация, FMEA, дашборд |
+| severity | ГОСТ Р 51901 — шкала тяжести | FMEA: S (Severity) |
+| days_lost | Закон «Об охране труда» — нетрудоспособность | Описательная статистика, тренд |
+| equipment_type | ISO 45001 — идентификация оборудования | FMEA: группировка |
+| operating_hours | ГОСТ Р 51901 — наработка на отказ | MTBF, O (Occurrence) |
+| downtime_hours | ISO 45001 — учёт простоев | FMEA: S, описательная статистика |
+| failure_cause | ISO/IEC 31010 — анализ причин | FMEA: виды отказов |
+| violation_type | ГОСТ 12.0.230 — классификация нарушений | Корреляция, FMEA: D |
+| is_audit_finding | СТБ ISO 45001 — результаты аудитов | FMEA: D (Detection) |
+
+</div>
+
+---
+
+# Интерпретация результатов
+
+<div class="grid grid-cols-2 gap-4 text-sm">
+<div class="p-3 rounded-xl bg-blue-50 border border-blue-100">
+
+### Тренд-анализ
+- Растущий тренд → **тревога**
+- p < 0.05 → значим
+- R² > 0.7 → прогноз надёжен
+
+</div>
+<div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+
+### Пуассон
+- P(X≥1) > 0.9 → критический риск
+- χ² p > 0.05 → модель адекватна
+
+</div>
+<div class="p-3 rounded-xl bg-amber-50 border border-amber-100">
+
+### FMEA (RPN)
+- < 50 — мониторинг
+- 50–150 — план мероприятий
+- \> 150 — **немедленные действия**
+
+</div>
+<div class="p-3 rounded-xl bg-violet-50 border border-violet-100">
+
+### Корреляция
+- \|r\| > 0.7 — сильная связь
+- p < 0.05 — значима
+- Инциденты ↔ отказы → приоритет ТОиР
+
+</div>
+</div>
+
+---
+
 # Модель данных
 
 <div class="grid grid-cols-2 gap-6">

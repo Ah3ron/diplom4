@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 class SafetyViolationBase(BaseModel):
     date: date
-    department: str
+    department_id: int
     violation_type: str
     is_audit_finding: bool = False
     responsible: Optional[str] = None

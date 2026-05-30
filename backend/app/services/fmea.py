@@ -1,4 +1,5 @@
 from app.schemas.fmea import FMEAAnalysis, FMEAInput, FMEAResult
+import numpy as np
 
 
 def _action_priority(rpn: int) -> tuple[str, str]:
@@ -45,6 +46,15 @@ def analyze_fmea(items: list[FMEAInput], analysis_name: str = "FMEA-анализ
     for item in items:
         rpn = item.severity * item.occurrence * item.detection
         priority, color = _action_priority(rpn)
+
+        rng = np.random.default_rng(seed=item.id * 37)
+        s_samples = rng.choice(range(max(1, item.severity - 1), min(10, item.severity + 2)), size=1000)
+        o_samples = rng.choice(range(max(1, item.occurrence - 1), min(10, item.occurrence + 2)), size=1000)
+        d_samples = rng.choice(range(max(1, item.detection - 1), min(10, item.detection + 2)), size=1000)
+        rpn_samples = s_samples * o_samples * d_samples
+        rpn_low = int(np.percentile(rpn_samples, 2.5))
+        rpn_high = int(np.percentile(rpn_samples, 97.5))
+
         results.append(
             FMEAResult(
                 id=item.id,
@@ -58,6 +68,8 @@ def analyze_fmea(items: list[FMEAInput], analysis_name: str = "FMEA-анализ
                 detection=item.detection,
                 detection_label=_detection_label(item.detection),
                 rpn=rpn,
+                rpn_low=rpn_low,
+                rpn_high=rpn_high,
                 action_priority=priority,
                 color=color,
             )

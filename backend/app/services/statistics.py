@@ -56,12 +56,14 @@ def trend_analysis(values: list[float], labels: list[str], forecast_periods: int
     x = np.arange(len(values))
     y = np.array(values)
 
-    slope, intercept, r_value, _, std_err = sp_stats.linregress(x, y)
+    slope, intercept, r_value, p_value, std_err = sp_stats.linregress(x, y)
     r_squared = r_value**2
 
     window = min(3, len(values))
     ma = pd.Series(values).rolling(window=window, min_periods=1).mean().tolist()
     ma_floats = [round(float(v), 4) for v in ma]
+
+    reg_line = [round(float(slope * xi + intercept), 4) for xi in x]
 
     future_x = np.arange(len(values), len(values) + forecast_periods)
     forecast_vals = slope * future_x + intercept
@@ -94,12 +96,111 @@ def trend_analysis(values: list[float], labels: list[str], forecast_periods: int
         trend_direction=direction,
         slope=round(float(slope), 4),
         r_squared=round(float(r_squared), 4),
+        p_value=round(float(p_value), 6),
+        intercept=round(float(intercept), 4),
         moving_avg=ma_floats,
+        regression_line=reg_line,
         forecast_values=forecast_floats,
         forecast_labels=forecast_labels,
         forecast_lower=forecast_lower,
         forecast_upper=forecast_upper,
     )
+
+
+def poisson_goodness_of_fit(observed_counts: list[int], lam: float) -> dict:
+    counts = np.array(observed_counts)
+    n = len(counts)
+    if n < 3:
+        return {"chi2_statistic": None, "p_value": None, "conclusion": "Недостаточно данных"}
+
+    max_k = int(counts.max())
+    observed_freq = np.zeros(max_k + 2)
+    for c in counts:
+        k = min(c, max_k + 1)
+        observed_freq[k] += 1
+
+    if observed_freq[-1] == 0:
+        observed_freq = observed_freq[:-1]
+
+    n_bins = len(observed_freq)
+    expected_freq = np.array([float(sp_stats.poisson.pmf(k, lam)) * n for k in range(n_bins - 1)])
+    expected_freq = np.append(expected_freq, n - expected_freq.sum())
+
+    tail = expected_freq[-1]
+    merge_from = None
+    for i in range(len(expected_freq) - 1, -1, -1):
+        if expected_freq[i] < 5:
+            merge_from = i
+        else:
+            break
+
+    if merge_from is not None and merge_from > 0:
+        observed_freq[merge_from - 1] += observed_freq[merge_from:].sum()
+        expected_freq[merge_from - 1] += expected_freq[merge_from:].sum()
+        observed_freq = observed_freq[:merge_from]
+        expected_freq = expected_freq[:merge_from]
+
+    valid = expected_freq > 0
+    if valid.sum() < 2:
+        return {"chi2_statistic": None, "p_value": None, "conclusion": "Недостаточно данных"}
+
+    chi2 = float(np.sum((observed_freq[valid] - expected_freq[valid]) ** 2 / expected_freq[valid]))
+    df = max(int(valid.sum()) - 2, 1)
+    p_val = float(sp_stats.chi2.sf(chi2, df))
+
+    if p_val > 0.05:
+        conclusion = "Распределение Пуассона согласуется с данными (p > 0.05)"
+    else:
+        conclusion = "Распределение Пуассона НЕ согласуется с данными (p ≤ 0.05)"
+
+    return {
+        "chi2_statistic": round(chi2, 4),
+        "degrees_of_freedom": df,
+        "p_value": round(p_val, 6),
+        "conclusion": conclusion,
+    }
+
+
+def correlation_analysis(
+    series_a: list[float],
+    series_b: list[float],
+    labels_a: list[str],
+    labels_b: list[str],
+) -> dict:
+    min_len = min(len(series_a), len(series_b))
+    if min_len < 3:
+        return {"error": "Недостаточно совпадающих периодов для корреляции"}
+
+    a = np.array(series_a[:min_len])
+    b = np.array(series_b[:min_len])
+
+    pearson_r, pearson_p = sp_stats.pearsonr(a, b)
+    spearman_r, spearman_p = sp_stats.spearmanr(a, b)
+
+    if abs(pearson_r) < 0.2:
+        strength = "Очень слабая"
+    elif abs(pearson_r) < 0.4:
+        strength = "Слабая"
+    elif abs(pearson_r) < 0.6:
+        strength = "Умеренная"
+    elif abs(pearson_r) < 0.8:
+        strength = "Сильная"
+    else:
+        strength = "Очень сильная"
+
+    return {
+        "pearson_r": round(float(pearson_r), 4),
+        "pearson_p_value": round(float(pearson_p), 6),
+        "spearman_r": round(float(spearman_r), 4),
+        "spearman_p_value": round(float(spearman_p), 6),
+        "strength": strength,
+        "n_periods": min_len,
+        "conclusion": (
+            f"{strength} корреляция (r={pearson_r:.2f}, p={pearson_p:.4f})"
+            if pearson_p < 0.05
+            else f"Корреляция статистически незначима (p={pearson_p:.4f})"
+        ),
+    }
 
 
 def _generate_forecast_labels(labels: list[str], count: int) -> list[str]:

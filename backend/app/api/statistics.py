@@ -5,13 +5,14 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.models.department import Department
 from app.models.equipment import EquipmentFailure
 from app.models.incident import Incident
 from app.models.safety import SafetyViolation
 from app.schemas.statistics import (
     TrendResult,
 )
-from app.services.statistics import descriptive_statistics, trend_analysis
+from app.services.statistics import descriptive_statistics, trend_analysis, poisson_goodness_of_fit, correlation_analysis
 
 router = APIRouter(prefix="/statistics", tags=["Статистика"])
 
@@ -32,7 +33,11 @@ async def descriptive(
     elif data_type == "safety":
         result = await db.execute(select(SafetyViolation))
         rows = result.scalars().all()
-        values = [1.0 for _ in rows]
+        grouped: dict[str, int] = {}
+        for row in rows:
+            key = str(row.date)[:7]
+            grouped[key] = grouped.get(key, 0) + 1
+        values = list(grouped.values()) if grouped else []
     else:
         return {"error": f"Unknown data_type: {data_type}"}
 
@@ -95,15 +100,20 @@ async def trend(
 
     data_points = []
     for i, (label, count) in enumerate(sorted_items):
-        trend_val = None
+        reg_val = None
+        ma_val = None
+        if i < len(tr.regression_line):
+            reg_val = tr.regression_line[i]
         if i < len(tr.moving_avg):
-            trend_val = tr.moving_avg[i]
-        data_points.append({"period": label, "count": count, "trend_value": trend_val})
+            ma_val = tr.moving_avg[i]
+        data_points.append({"period": label, "count": count, "trend_value": reg_val, "moving_avg": ma_val})
 
     return {
         "data": data_points,
         "slope": tr.slope,
+        "intercept": tr.intercept,
         "r_squared": tr.r_squared,
+        "p_value": tr.p_value,
         "direction": (
             "increasing" if tr.trend_direction == "Растущий"
             else "decreasing" if tr.trend_direction == "Нисходящий"
@@ -183,6 +193,8 @@ async def poisson_analysis_endpoint(
 
     ci_low, ci_high = sp_stats.poisson.interval(0.95, lam * time_period)
 
+    gof = poisson_goodness_of_fit(counts, lam)
+
     first_date = str(rows[0].date)[:10] if rows else None
     last_date = str(rows[-1].date)[:10] if rows else None
 
@@ -202,6 +214,7 @@ async def poisson_analysis_endpoint(
         "expected_in_period": round(lam * time_period, 2),
         "distribution": distribution,
         "confidence_interval": [max(0, float(ci_low)), float(ci_high)],
+        "goodness_of_fit": gof,
     }
 
 
@@ -213,7 +226,9 @@ async def dashboard(db: AsyncSession = Depends(get_db)):
 
     incidents_by_department: dict[str, int] = {}
     result = await db.execute(
-        select(Incident.department, func.count(Incident.id)).group_by(Incident.department)
+        select(Department.name, func.count(Incident.id))
+        .join(Department, Incident.department_id == Department.id)
+        .group_by(Department.name)
     )
     for dept, cnt in result.all():
         incidents_by_department[dept] = cnt
@@ -243,9 +258,9 @@ async def dashboard(db: AsyncSession = Depends(get_db)):
 
     violations_by_department: dict[str, int] = {}
     result = await db.execute(
-        select(SafetyViolation.department, func.count(SafetyViolation.id)).group_by(
-            SafetyViolation.department
-        )
+        select(Department.name, func.count(SafetyViolation.id))
+        .join(Department, SafetyViolation.department_id == Department.id)
+        .group_by(Department.name)
     )
     for dept, cnt in result.all():
         violations_by_department[dept] = cnt
@@ -268,3 +283,59 @@ async def dashboard(db: AsyncSession = Depends(get_db)):
         "violations_by_department": violations_by_department,
         "monthly_trend": monthly_trend,
     }
+
+
+@router.get("/correlation")
+async def correlation(
+    period: str = Query("monthly"),
+    db: AsyncSession = Depends(get_db),
+):
+    inc_result = await db.execute(select(Incident).order_by(Incident.date))
+    incidents = inc_result.scalars().all()
+
+    eq_result = await db.execute(select(EquipmentFailure).order_by(EquipmentFailure.date))
+    failures = eq_result.scalars().all()
+
+    viol_result = await db.execute(select(SafetyViolation).order_by(SafetyViolation.date))
+    violations = viol_result.scalars().all()
+
+    def _group(rows: list, period: str) -> dict[str, int]:
+        g: dict[str, int] = {}
+        for row in rows:
+            d = str(row.date)
+            if period == "yearly":
+                key = d[:4]
+            elif period == "quarterly":
+                m = int(d[5:7])
+                q = (m - 1) // 3 + 1
+                key = f"{d[:4]}-Q{q}"
+            else:
+                key = d[:7]
+            g[key] = g.get(key, 0) + 1
+        return g
+
+    inc_grouped = _group(incidents, period)
+    eq_grouped = _group(failures, period)
+    viol_grouped = _group(violations, period)
+
+    all_keys = sorted(set(inc_grouped) | set(eq_grouped) | set(viol_grouped))
+    inc_vals = [inc_grouped.get(k, 0) for k in all_keys]
+    eq_vals = [eq_grouped.get(k, 0) for k in all_keys]
+    viol_vals = [viol_grouped.get(k, 0) for k in all_keys]
+
+    results = {}
+    if len(all_keys) >= 3:
+        results["incidents_vs_equipment"] = correlation_analysis(
+            inc_vals, eq_vals, all_keys, all_keys
+        )
+        results["incidents_vs_violations"] = correlation_analysis(
+            inc_vals, viol_vals, all_keys, all_keys
+        )
+        results["equipment_vs_violations"] = correlation_analysis(
+            eq_vals, viol_vals, all_keys, all_keys
+        )
+    else:
+        results = {"error": "Недостаточно данных для корреляционного анализа (нужно ≥3 периодов)"}
+
+    results["periods"] = [{"period": k, "incidents": inc_vals[i], "equipment": eq_vals[i], "violations": viol_vals[i]} for i, k in enumerate(all_keys)]
+    return results

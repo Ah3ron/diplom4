@@ -15,5 +15,7 @@ class RiskAssessment(Base):
     name: Mapped[str] = mapped_column(String(300), nullable=False)
     input_params: Mapped[str] = mapped_column(Text, nullable=False)
     result: Mapped[str] = mapped_column(Text, nullable=False)
+    source_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    source_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     author: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)

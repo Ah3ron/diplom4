@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.models.department import Department
 from app.models.incident import Incident
 from app.schemas import IncidentCreate, IncidentResponse, IncidentStatistics
 
@@ -22,7 +23,11 @@ async def list_incidents(
 ):
     q = select(Incident).order_by(Incident.date.desc())
     if department:
-        q = q.where(Incident.department == department)
+        dept_q = select(Department.id).where(Department.name == department)
+        dept_result = await db.execute(dept_q)
+        dept_id = dept_result.scalar_one_or_none()
+        if dept_id:
+            q = q.where(Incident.department_id == dept_id)
     if severity:
         q = q.where(Incident.severity == severity)
     if year:
@@ -64,13 +69,21 @@ async def incident_statistics(
     freq_rate = total * 1000 / avg_emp
     sev_rate = days / total if total > 0 else 0
 
+    dept_ids = {i.department_id for i in incidents}
+    dept_map: dict[int, str] = {}
+    if dept_ids:
+        dept_result = await db.execute(select(Department).where(Department.id.in_(dept_ids)))
+        for d in dept_result.scalars().all():
+            dept_map[d.id] = d.name
+
     by_dept: dict[str, int] = {}
     by_sev: dict[str, int] = {}
     by_type: dict[str, int] = {}
     monthly: dict[str, int] = {}
 
     for inc in incidents:
-        by_dept[inc.department] = by_dept.get(inc.department, 0) + 1
+        dept_name = dept_map.get(inc.department_id, str(inc.department_id))
+        by_dept[dept_name] = by_dept.get(dept_name, 0) + 1
         by_sev[inc.severity] = by_sev.get(inc.severity, 0) + 1
         by_type[inc.incident_type] = by_type.get(inc.incident_type, 0) + 1
         key = str(inc.date)[:7]

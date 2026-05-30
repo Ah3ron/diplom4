@@ -1,12 +1,12 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 
 class IncidentBase(BaseModel):
     date: date
-    department: str
+    department_id: int
     incident_type: str
     severity: str
     days_lost: int = 0
@@ -19,6 +19,7 @@ class IncidentCreate(IncidentBase):
 
 class IncidentResponse(IncidentBase):
     id: int
+    department_name: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

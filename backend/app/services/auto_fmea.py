@@ -4,6 +4,7 @@ from datetime import date
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.department import Department
 from app.models.equipment import EquipmentFailure
 from app.models.incident import Incident
 from app.models.safety import SafetyViolation
@@ -103,13 +104,13 @@ async def auto_fmea(
 
     inc_q = select(Incident)
     if department:
-        inc_q = inc_q.where(Incident.department == department)
+        inc_q = inc_q.join(Department, Incident.department_id == Department.id).where(Department.name == department)
     inc_result = await db.execute(inc_q)
     incidents = inc_result.scalars().all()
 
     viol_q = select(SafetyViolation)
     if department:
-        viol_q = viol_q.where(SafetyViolation.department == department)
+        viol_q = viol_q.join(Department, SafetyViolation.department_id == Department.id).where(Department.name == department)
     viol_result = await db.execute(viol_q)
     violations = viol_result.scalars().all()
 

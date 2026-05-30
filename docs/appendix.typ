@@ -1,3 +1,112 @@
+= Фрагмент кода ORM-модели подразделения (models/department.py)
+
+#{
+  set text(size: 11pt, font: "DejaVu Sans Mono")
+  ```python
+class Department(Base):
+    __tablename__ = "departments"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
+    name: Mapped[str] = mapped_column(
+        String(200), nullable=False, unique=True
+    )
+    type: Mapped[Optional[str]] = mapped_column(
+        String(200), nullable=True
+    )
+
+    incidents = relationship(
+        "Incident", back_populates="department_ref",
+        lazy="selectin"
+    )
+    equipment_failures = relationship(
+        "EquipmentFailure", back_populates="department_ref",
+        lazy="selectin"
+    )
+    safety_violations = relationship(
+        "SafetyViolation", back_populates="department_ref",
+        lazy="selectin"
+    )
+    medical_exams = relationship(
+        "MedicalExam", back_populates="department_ref",
+        lazy="selectin"
+    )
+  ```
+}
+
+= Фрагмент кода ORM-модели инцидента (models/incident.py)
+
+#{
+  set text(size: 11pt, font: "DejaVu Sans Mono")
+  ```python
+class Incident(Base):
+    __tablename__ = "incidents"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
+    date: Mapped[date] = mapped_column(Date, nullable=False)
+    department_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("departments.id"), nullable=False
+    )
+    incident_type: Mapped[str] = mapped_column(
+        String(200), nullable=False
+    )
+    severity: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )
+    days_lost: Mapped[int] = mapped_column(
+        Integer, default=0
+    )
+    description: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )
+
+    department_ref = relationship(
+        "Department", back_populates="incidents"
+    )
+  ```
+}
+
+= Фрагмент кода модели оценки риска (models/risk_assessment.py)
+
+#{
+  set text(size: 11pt, font: "DejaVu Sans Mono")
+  ```python
+class RiskAssessment(Base):
+    __tablename__ = "risk_assessments"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
+    method: Mapped[str] = mapped_column(
+        String(100), nullable=False
+    )
+    name: Mapped[str] = mapped_column(
+        String(300), nullable=False
+    )
+    input_params: Mapped[str] = mapped_column(
+        Text, nullable=False
+    )
+    result: Mapped[str] = mapped_column(
+        Text, nullable=False
+    )
+    source_type: Mapped[Optional[str]] = mapped_column(
+        String(100), nullable=True
+    )
+    source_id: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
+    author: Mapped[Optional[str]] = mapped_column(
+        String(200), nullable=True
+    )
+  ```
+}
+
 = Фрагмент кода автоматического FMEA-анализа
 
 #{
@@ -11,7 +120,13 @@ async def auto_fmea(
 ) -> dict:
     MONTHS_SPAN = 64
 
-    stmt = select(EquipmentFailure)
+    stmt = (
+        select(EquipmentFailure)
+        .join(Department,
+              EquipmentFailure.department_id == Department.id)
+    )
+    if department:
+        stmt = stmt.where(Department.name == department)
     if equipment_type:
         stmt = stmt.where(
             EquipmentFailure.equipment_type.contains(equipment_type)

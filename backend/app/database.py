@@ -13,6 +13,12 @@ async def get_db():
 
 async def init_db():
     from app.models import Base
+    import app.models.department  # noqa: F401
+    import app.models.incident  # noqa: F401
+    import app.models.equipment  # noqa: F401
+    import app.models.safety  # noqa: F401
+    import app.models.health  # noqa: F401
+    import app.models.risk_assessment  # noqa: F401
 
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     async with engine.begin() as conn:

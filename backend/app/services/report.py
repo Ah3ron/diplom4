@@ -367,9 +367,11 @@ def _build_report_elements(data_type, dashboard, descriptive, trend_data, poisso
     ))
     el.append(Paragraph(
         "В отчёте применены следующие методы анализа: описательная статистика, линейный "
-        "тренд-анализ с прогнозом, распределение Пуассона для моделирования частоты "
-        "неблагоприятных событий, а также метод FMEA (анализ видов и последствий отказов) "
-        "с автоматическим расчётом показателя приоритетности риска (RPN) [3, с. 78].",
+        "тренд-анализ с прогнозом и оценкой значимости (p-value), распределение Пуассона "
+        "для моделирования частоты неблагоприятных событий с проверкой адекватности "
+        "по критерию \u03c7\u00b2, а также метод FMEA (анализ видов и последствий отказов) "
+        "с автоматическим расчётом показателя приоритетности риска (RPN) и "
+        "бутстрэп-оценкой доверительных интервалов [3, с. 78].",
         _body(),
     ))
     el.append(PageBreak())
@@ -478,9 +480,12 @@ def _build_report_elements(data_type, dashboard, descriptive, trend_data, poisso
     el.append(Paragraph(
         "Качество модели оценивается с помощью коэффициента детерминации R\u00b2, "
         "принимающего значения от 0 до 1. Чем ближе значение R\u00b2 к единице, тем "
-        "лучше модель описывает исходные данные [7, с. 118]. Для оценки неопределённости "
+        "лучше модель описывает исходные данные [7, с. 118]. Статистическая значимость "
+        "тренда оценивается по p-value: если p < 0,05, тенденция признаётся статистически "
+        "значимой. Для оценки неопределённости "
         "прогноза рассчитывается 95%-ный доверительный интервал на основе t-распределения "
-        "Стьюдента.",
+        "Стьюдента. Дополнительно применяется скользящее среднее (окно 3) для "
+        "сглаживания краткосрочных колебаний.",
         _body(),
     ))
 
@@ -493,13 +498,16 @@ def _build_report_elements(data_type, dashboard, descriptive, trend_data, poisso
         el.append(Spacer(1, 4 * mm))
         tn = _next_tbl()
         el.append(Paragraph(f"Таблица {tn} — Параметры тренд-модели", _caption()))
-        t = Table([
+        trend_rows = [
             ["Параметр", "Значение"],
             ["Направление тренда", direction],
-            ["Наклон (\u03b2)", f"{slope:.4f}"],
+            ["Уравнение регрессии", f"y = {slope:.4f}x + {trend_data.get('intercept', 0):.4f}"],
             ["Коэффициент детерминации (R\u00b2)", f"{r2:.4f}"],
+            ["p-value", f"{trend_data.get('p_value', 0):.6f}"],
+            ["Статистическая значимость", "Значим (p < 0,05)" if trend_data.get("p_value", 1) < 0.05 else "Не значим (p \u2265 0,05)"],
             ["Количество периодов прогноза", str(len(trend_data.get("forecast_values", [])))],
-        ], colWidths=cw)
+        ]
+        t = Table(trend_rows, colWidths=cw)
         t.setStyle(_tbl_style())
         el.append(t)
         el.append(Spacer(1, 6 * mm))
@@ -564,7 +572,10 @@ def _build_report_elements(data_type, dashboard, descriptive, trend_data, poisso
     ))
     el.append(Paragraph(
         "Оценка параметра \u03bb производится по фактическим данным как среднее арифметическое "
-        "числа событий за каждый период наблюдения. Для оценки точности рассчитывается "
+        "числа событий за каждый период наблюдения. Для проверки адекватности модели Пуассона "
+        "применяется критерий согласия \u03c7\u00b2 (хи-квадрат) Пирсона: если p > 0,05, "
+        "распределение Пуассона согласуется с наблюдаемыми данными [8, с. 102]. "
+        "Для оценки точности рассчитывается "
         "95%-ный доверительный интервал.",
         _body(),
     ))
@@ -578,11 +589,12 @@ def _build_report_elements(data_type, dashboard, descriptive, trend_data, poisso
         p_one = poisson_data.get("prob_at_least_one", 0)
         expected = poisson_data.get("expected_in_period", 0)
         ci = poisson_data.get("confidence_interval", [0, 0])
+        gof = poisson_data.get("goodness_of_fit", {})
 
         el.append(Spacer(1, 4 * mm))
         tn = _next_tbl()
         el.append(Paragraph(f"Таблица {tn} — Результаты анализа Пуассона", _caption()))
-        t = Table([
+        poisson_rows = [
             ["Показатель", "Значение"],
             ["Интенсивность (\u03bb)", f"{lam:.4f}"],
             ["Единица периода", unit],
@@ -592,7 +604,14 @@ def _build_report_elements(data_type, dashboard, descriptive, trend_data, poisso
             ["P(X \u2265 1)", f"{p_one:.4f}"],
             ["Ожидаемое число событий за период", f"{expected:.2f}"],
             ["95% доверительный интервал", f"[{ci[0]:.2f}; {ci[1]:.2f}]"],
-        ], colWidths=cw)
+        ]
+        if gof.get("chi2_statistic") is not None:
+            poisson_rows.append(["\u03c7\u00b2 статистика", f"{gof['chi2_statistic']:.4f}"])
+            poisson_rows.append(["Число степеней свободы", str(gof.get("degrees_of_freedom", ""))])
+            poisson_rows.append(["p-value (\u03c7\u00b2)", f"{gof.get('p_value', 0):.6f}"])
+            gof_conclusion = "Модель адекватна (p > 0,05)" if gof.get("p_value", 0) > 0.05 else "Модель НЕ адекватна (p \u2264 0,05)"
+            poisson_rows.append(["Заключение по \u03c7\u00b2", gof_conclusion])
+        t = Table(poisson_rows, colWidths=cw)
         t.setStyle(_tbl_style())
         el.append(t)
         el.append(Spacer(1, 6 * mm))
@@ -631,7 +650,10 @@ def _build_report_elements(data_type, dashboard, descriptive, trend_data, poisso
     el.append(Paragraph(
         "В настоящем отчёте значения S, O и D определяются автоматически на основании "
         "статистических данных: S — по средней продолжительности простоя и тяжести связанных "
-        "инцидентов, O — по частоте отказов, D — по соотношению нарушений и результатов аудитов.",
+        "инцидентов, O — по частоте отказов, D — по соотношению нарушений и результатов аудитов. "
+        "Для оценки неопределённости RPN применяется бутстрэп-метод (1000 итераций, "
+        "варьирование S/O/D на \u00b11 по шкале) с расчётом 95%-ного доверительного интервала "
+        "(2,5-й и 97,5-й перцентили).",
         _body(),
     ))
 
@@ -693,10 +715,14 @@ def _build_report_elements(data_type, dashboard, descriptive, trend_data, poisso
                 Paragraph("O", header_style),
                 Paragraph("D", header_style),
                 Paragraph("RPN", header_style),
+                Paragraph("RPN 95% ДИ", header_style),
                 Paragraph("Приоритет", header_style),
             ]
         ]
         for item in sorted(items, key=lambda x: x.get("rpn", 0), reverse=True)[:20]:
+            rpn_low = item.get("rpn_low", 0)
+            rpn_high = item.get("rpn_high", 0)
+            ci_str = f"[{rpn_low}; {rpn_high}]" if rpn_low or rpn_high else "\u2014"
             fmea_t.append([
                 Paragraph(str(item.get("id", "")), cell_center),
                 Paragraph(str(item.get("failure_mode", "")), cell_style),
@@ -704,9 +730,10 @@ def _build_report_elements(data_type, dashboard, descriptive, trend_data, poisso
                 Paragraph(str(item.get("occurrence", "")), cell_center),
                 Paragraph(str(item.get("detection", "")), cell_center),
                 Paragraph(str(item.get("rpn", "")), cell_center),
+                Paragraph(ci_str, cell_center),
                 Paragraph(str(item.get("action_priority", "")), cell_center),
             ])
-        cw2 = [FRAME_W * 0.05, FRAME_W * 0.35, FRAME_W * 0.07, FRAME_W * 0.07, FRAME_W * 0.07, FRAME_W * 0.10, FRAME_W * 0.15]
+        cw2 = [FRAME_W * 0.04, FRAME_W * 0.30, FRAME_W * 0.06, FRAME_W * 0.06, FRAME_W * 0.06, FRAME_W * 0.08, FRAME_W * 0.14, FRAME_W * 0.14]
         t = Table(fmea_t, colWidths=cw2)
         t.setStyle(TableStyle([
             ("FONTNAME", (0, 0), (-1, -1), "TNR"),
@@ -744,8 +771,9 @@ def _build_report_elements(data_type, dashboard, descriptive, trend_data, poisso
         _body(),
     ))
     el.append(Paragraph(
-        "Применённые статистические методы (описательная статистика, тренд-анализ, "
-        "распределение Пуассона, FMEA) позволили получить количественную оценку уровня "
+        "Применённые статистические методы (описательная статистика, тренд-анализ "
+        "с оценкой значимости, распределение Пуассона с критерием согласия \u03c7\u00b2, "
+        "FMEA с бутстрэп-интервалами) позволили получить количественную оценку уровня "
         "производственных рисков и выявить наиболее критичные виды отказов оборудования.",
         _body(),
     ))

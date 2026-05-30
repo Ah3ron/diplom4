@@ -31,6 +31,7 @@ import {
   Legend,
   Area,
   ComposedChart,
+
   Label,
 } from "recharts"
 
@@ -139,6 +140,7 @@ function TrendAnalysis() {
       period: d.period,
       count: d.count,
       trend_line: d.trend_value,
+      moving_avg: d.moving_avg,
       forecast: null as number | null,
       ci_upper: null as number | null,
       ci_lower: null as number | null,
@@ -276,10 +278,20 @@ function TrendAnalysis() {
                 <Line
                   type="monotone"
                   dataKey="trend_line"
-                  name="Линия тренда"
+                  name="Регрессия"
                   stroke={CHART_COLORS[1]}
                   strokeDasharray="5 5"
                   strokeWidth={2}
+                  dot={false}
+                  connectNulls={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="moving_avg"
+                  name="Скользящее среднее"
+                  stroke={CHART_COLORS[2]}
+                  strokeDasharray="3 3"
+                  strokeWidth={1.5}
                   dot={false}
                   connectNulls={false}
                 />
@@ -303,6 +315,12 @@ function TrendAnalysis() {
                 <span>
                   R²: <strong>{trend.r_squared?.toFixed(4)}</strong>
                 </span>
+                {trend.p_value !== undefined && (
+                  <span>
+                    p-value: <strong>{trend.p_value?.toFixed(4)}</strong>
+                    {trend.p_value < 0.05 ? " (значим)" : " (не значим)"}
+                  </span>
+                )}
                 <span>
                   {trend.direction === "increasing"
                     ? "↑ Рост"
@@ -321,9 +339,9 @@ function TrendAnalysis() {
               </div>
             )}
             <div className="text-xs text-muted-foreground mt-2 space-y-1 px-2">
-              <p>Линейная регрессия: y = ax + b, где a — наклон (тенденция), b — смещение</p>
-              <p>R² — коэффициент детерминации (доля объяснённой дисперсии, 0–1)</p>
-              <p>Серая область — 95%-ный доверительный интервал прогноза</p>
+              <p>Линейная регрессия: y = {trend.slope?.toFixed(2)}x + {trend.intercept?.toFixed(2)}</p>
+              <p>R² — коэффициент детерминации; p-value — статистическая значимость тренда (p &lt; 0.05 — значим)</p>
+              <p>Скользящее среднее — сглаживание (окно 3); серая область — 95% ДИ прогноза</p>
             </div>
           </>
         )}
@@ -517,10 +535,20 @@ function PoissonAnalysis() {
                 <strong>{result.confidence_interval[1]?.toFixed(1)}</strong>]
               </div>
             )}
+            {result.goodness_of_fit?.chi2_statistic != null && (
+              <div className="mt-2 text-sm text-muted-foreground">
+                Критерий согласия χ²: <strong>{result.goodness_of_fit.chi2_statistic}</strong>
+                {" "}(df={result.goodness_of_fit.degrees_of_freedom}, p={result.goodness_of_fit.p_value?.toFixed(4)})
+                {" "}&mdash; <span className={result.goodness_of_fit.p_value > 0.05 ? "text-green-600" : "text-red-600"}>
+                  {result.goodness_of_fit.p_value > 0.05 ? "модель адекватна" : "модель НЕ адекватна"}
+                </span>
+              </div>
+            )}
             <div className="text-xs text-muted-foreground mt-2 space-y-1 px-2">
               <p>λ (лямбда) — оценка интенсивности событий (среднее число за период)</p>
               <p>P(X=k) = λ^k · e^(-λ) / k! — вероятность ровно k событий</p>
               <p>95% ДИ — доверительный интервал для числа событий</p>
+              <p>χ²-критерий — проверка согласия распределения Пуассона с данными (p &gt; 0.05 → модель адекватна)</p>
             </div>
           </>
         )}

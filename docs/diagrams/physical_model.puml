@@ -5,15 +5,15 @@ skinparam shadowing false
 entity "DEPARTMENTS" as dept {
   * id : INTEGER <<PK>>
   --
-  * name : TEXT <<NOT NULL>>
+  * name : TEXT <<NOT NULL, UNIQUE>>
   type : TEXT
 }
 
 entity "INCIDENTS" as inc {
   * id : INTEGER <<PK>>
   --
-  * date : TEXT <<NOT NULL>>
-  department_id : INTEGER <<FK>>
+  * date : DATE <<NOT NULL>>
+  * department_id : INTEGER <<FK → departments(id)>>
   incident_type : TEXT
   severity : TEXT
   days_lost : INTEGER <<DEFAULT 0>>
@@ -23,34 +23,37 @@ entity "INCIDENTS" as inc {
 entity "EQUIPMENT_FAILURES" as fail {
   * id : INTEGER <<PK>>
   --
-  * date : TEXT <<NOT NULL>>
-  department_id : INTEGER <<FK>>
+  * date : DATE <<NOT NULL>>
+  * department_id : INTEGER <<FK → departments(id)>>
   equipment_type : TEXT
   equipment_name : TEXT
   operating_hours : REAL <<DEFAULT 0>>
   downtime_hours : REAL <<DEFAULT 0>>
   failure_cause : TEXT
-  repair_cost : REAL <<DEFAULT 0>>
+  repair_cost : REAL
+  description : TEXT
 }
 
 entity "SAFETY_VIOLATIONS" as viol {
   * id : INTEGER <<PK>>
   --
-  * date : TEXT <<NOT NULL>>
-  department_id : INTEGER <<FK>>
+  * date : DATE <<NOT NULL>>
+  * department_id : INTEGER <<FK → departments(id)>>
   violation_type : TEXT
-  is_audit_finding : INTEGER <<DEFAULT 0>>
+  is_audit_finding : BOOLEAN <<DEFAULT FALSE>>
   responsible : TEXT
+  description : TEXT
 }
 
 entity "MEDICAL_EXAMS" as med {
   * id : INTEGER <<PK>>
   --
-  * date : TEXT <<NOT NULL>>
+  * date : DATE <<NOT NULL>>
   profession : TEXT
-  department_id : INTEGER <<FK>>
+  * department_id : INTEGER <<FK → departments(id)>>
   findings : TEXT
   disease_category : TEXT
+  notes : TEXT
 }
 
 entity "RISK_ASSESSMENTS" as risk {
@@ -60,7 +63,9 @@ entity "RISK_ASSESSMENTS" as risk {
   * name : TEXT <<NOT NULL>>
   input_params : TEXT
   result : TEXT
-  created_at : TEXT <<CURRENT_TIMESTAMP>>
+  source_type : TEXT
+  source_id : INTEGER
+  created_at : DATETIME <<DEFAULT CURRENT_TIMESTAMP>>
   author : TEXT
 }
 
@@ -68,11 +73,4 @@ dept ||--o{ inc : "FK"
 dept ||--o{ fail : "FK"
 dept ||--o{ viol : "FK"
 dept ||--o{ med : "FK"
-inc }o--o{ fail : "N:M"
-inc }o--o{ viol : "N:M"
-inc }o--o{ med : "N:M"
-inc ||--o{ risk : "1:N"
-fail ||--o{ risk : "1:N"
-viol ||--o{ risk : "1:N"
-med ||--o{ risk : "1:N"
 @enduml

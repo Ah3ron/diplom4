@@ -50,7 +50,7 @@
   show figure.where(kind: table): set figure(supplement: none, numbering: _chapter-numbering)
   show figure.where(kind: table): it => context {
     set text(size: 12pt)
-    set par(first-line-indent: (amount: 1.25cm))
+    set par(justify: false, first-line-indent: (amount: 1.25cm))
     v(8pt)
     align(left, [Таблица #it.counter.display() – #it.caption.body])
     it.body

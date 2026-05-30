@@ -288,8 +288,9 @@ export function FMEAPage() {
                       <TableHead>S</TableHead>
                       <TableHead>O</TableHead>
                       <TableHead>D</TableHead>
-                      <TableHead>RPN</TableHead>
-                      <TableHead>Приоритет</TableHead>
+                          <TableHead>RPN</TableHead>
+                          <TableHead>RPN 95% ДИ</TableHead>
+                          <TableHead>Приоритет</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -305,6 +306,9 @@ export function FMEAPage() {
                           <TableCell>{item.detection}</TableCell>
                           <TableCell className="font-bold" style={{ color: rpnColor(item.rpn) }}>
                             {item.rpn}
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            [{item.rpn_low}–{item.rpn_high}]
                           </TableCell>
                           <TableCell>
                             <Badge variant={priorityVariant(item.action_priority)}>
@@ -322,6 +326,7 @@ export function FMEAPage() {
           <div className="text-xs text-muted-foreground mt-2 space-y-1 px-2">
             <p>RPN = S × O × D — число приоритета риска (от 1 до 1000)</p>
             <p>S — тяжесть последствий (1–10), O — частота возникновения (1–10), D — невозможность обнаружения (1–10)</p>
+            <p>RPN 95% ДИ — доверительный интервал, полученный методом бутстрапа (±1 балл по каждой шкале)</p>
             <p className="flex gap-3">
               <span className="text-green-600">● до 40 — низкий</span>
               <span className="text-yellow-600">● 41–100 — средний</span>

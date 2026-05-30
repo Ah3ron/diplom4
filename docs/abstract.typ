@@ -25,8 +25,39 @@
 Автор работы подтверждает, что приведенный в ней материал правильно и объективно отражает состояние исследуемого процесса (разрабатываемого объекта), все заимствованные из литературных и других источников теоретические, методологические и методические положения и концепции сопровождаются ссылками на их авторов.
 
 #align(right)[
-  #box(width: 40%, stroke: (bottom: 0.5pt))[\
-  #set text(size: 10pt)
-  подпись студента
-  ]
+ #line(length: 20%)
+ #v(0pt, weak: true)
+ #text(size: 12pt)[(подпись) #box(width: 18pt )]
+]
+
+#pagebreak()
+
+#heading(level: 1, numbering: none, outlined: false)[ABSTRACT]
+
+Diploma project: 65 p., 16 figures, 13 tables, 31 sources, 4 appendices.
+
+RISK ASSESSMENT, FMEA, POISSON ANALYSIS, TREND ANALYSIS, SOFTWARE MODULE, STATISTICAL MODELS, DATABASE, WEB APPLICATION, FASTAPI, REACT.
+
+The object of research — production risks of CJSC "Soligorsk Institute of Resource-Saving Problems with Pilot Production".
+
+The subject of research — methods and software tools for production risk assessment based on statistical models.
+
+The purpose of the diploma project: development of a software module for production risk assessment based on statistical models (descriptive statistics, trend analysis with forecasting, Poisson analysis, FMEA analysis).
+
+Research methods: general scientific methods of cognition, such as comparison, deduction and induction, analysis and synthesis. The work uses methods of mathematical statistics, regression analysis, time series analysis, FMEA analysis, object-oriented design.
+
+Research and development: theoretical foundations of production risk assessment were studied; the analysis of the subject area and existing software analogues was carried out; a software module for production risk assessment was developed.
+
+Elements of scientific novelty: a software module integrating descriptive statistics, trend analysis with forecasting, Poisson analysis and FMEA analysis into a single software module was developed.
+
+Area of possible practical application: industrial enterprises of mechanical engineering and mining industries of the Republic of Belarus.
+
+Technical and economic, social significance: the developed software module will increase the efficiency and objectivity of production risk assessment, reduce the labor intensity of statistical data processing and improve managerial decision-making.
+
+The author of the work confirms that the material given in it correctly and objectively reflects the state of the investigated process (developed object), all theoretical, methodological and methodological provisions and concepts borrowed from literature and other sources are accompanied by references to their authors.
+
+#align(right)[
+ #line(length: 20%)
+ #v(0pt, weak: true)
+ #text(size: 12pt)[(подпись) #box(width: 18pt )]
 ]

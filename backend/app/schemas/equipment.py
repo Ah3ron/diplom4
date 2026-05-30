@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 class EquipmentFailureBase(BaseModel):
     date: date
+    department_id: int
     equipment_type: str
     equipment_name: str
     operating_hours: float = 0

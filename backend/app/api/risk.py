@@ -23,6 +23,8 @@ async def fmea_analysis(
         name=result["analysis_name"],
         input_params=json.dumps({"department": department, "equipment_type": equipment_type}),
         result=json.dumps(result),
+        source_type="equipment_failures",
+        source_id=None,
     )
     db.add(assessment)
     await db.commit()

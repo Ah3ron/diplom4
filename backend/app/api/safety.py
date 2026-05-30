@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.models.department import Department
 from app.models.safety import SafetyViolation
 from app.schemas.safety import SafetyStatistics, SafetyViolationCreate, SafetyViolationResponse
 
@@ -21,7 +22,11 @@ async def list_violations(
 ):
     q = select(SafetyViolation).order_by(SafetyViolation.date.desc())
     if department:
-        q = q.where(SafetyViolation.department == department)
+        dept_q = select(Department.id).where(Department.name == department)
+        dept_result = await db.execute(dept_q)
+        dept_id = dept_result.scalar_one_or_none()
+        if dept_id:
+            q = q.where(SafetyViolation.department_id == dept_id)
     if year:
         q = q.where(func.strftime("%Y", SafetyViolation.date) == str(year))
     q = q.offset(skip).limit(limit)
@@ -54,13 +59,21 @@ async def safety_statistics(
             by_department={}, by_type={}, monthly_counts=[],
         )
 
+    dept_ids = {v.department_id for v in violations}
+    dept_map: dict[int, str] = {}
+    if dept_ids:
+        dept_result = await db.execute(select(Department).where(Department.id.in_(dept_ids)))
+        for d in dept_result.scalars().all():
+            dept_map[d.id] = d.name
+
     by_dept: dict[str, int] = {}
     by_type: dict[str, int] = {}
     monthly: dict[str, int] = {}
     audit_count = 0
 
     for v in violations:
-        by_dept[v.department] = by_dept.get(v.department, 0) + 1
+        dept_name = dept_map.get(v.department_id, str(v.department_id))
+        by_dept[dept_name] = by_dept.get(dept_name, 0) + 1
         by_type[v.violation_type] = by_type.get(v.violation_type, 0) + 1
         key = str(v.date)[:7]
         monthly[key] = monthly.get(key, 0) + 1

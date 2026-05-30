@@ -4,159 +4,144 @@ skinparam shadowing false
 skinparam dpi 150
 left to right direction
 
-package "statistics" {
-class DescriptiveStats {
-+count : int
-+mean : float
-+std : float
-+min : float
-+q1 : float
-+median : float
-+q3 : float
-+max : float
+package "models" {
+class Department {
+  +id : int
+  +name : str
+  +type : str
 }
-class PoissonResult {
-+lambda_est : float
-+probabilities : List
-+forecast : List
-+ci : Tuple<float,float>
+class Incident {
+  +id : int
+  +date : date
+  +department_id : int <<FK>>
+  +incident_type : str
+  +severity : str
+  +days_lost : int
+  +description : str
 }
-class TrendResult {
-+trend_direction : str
-+slope : float
-+r2 : float
-+moving_avg : List
-+forecast : List
+class EquipmentFailure {
+  +id : int
+  +date : date
+  +department_id : int <<FK>>
+  +equipment_type : str
+  +equipment_name : str
+  +operating_hours : float
+  +downtime_hours : float
+  +failure_cause : str
+  +repair_cost : float
+  +description : str
 }
-class StatisticsResponse {
-+descriptive : DescriptiveStats
-+poisson? : PoissonResult
-+trend? : TrendResult
+class SafetyViolation {
+  +id : int
+  +date : date
+  +department_id : int <<FK>>
+  +violation_type : str
+  +is_audit_finding : bool
+  +responsible : str
+  +description : str
+}
+class MedicalExam {
+  +id : int
+  +date : date
+  +profession : str
+  +department_id : int <<FK>>
+  +findings : str
+  +disease_category : str
+  +notes : str
+}
+class RiskAssessment {
+  +id : int
+  +method : str
+  +name : str
+  +input_params : JSON
+  +result : JSON
+  +source_type : str
+  +source_id : int
+  +created_at : datetime
+  +author : str
 }
 }
 
-package "core" {
+package "schemas" {
 class IncidentBase {
-+date : date
-+department : str
-+type : str
-+severity : SeverityLevel
-+days_lost : int
-}
-class IncidentStatistics {
-+total_incidents : int
-+days_lost : int
-+by_department : dict
+  +date : date
+  +department_id : int
+  +incident_type : str
+  +severity : str
+  +days_lost : int
 }
 class EquipmentFailureBase {
-+date : date
-+equipment : str
-+op_hours : float
-+downtime : float
-+cost : float
-}
-class EquipmentStatistics {
-+total_failures : int
-+downtime : float
-+mtbf : float
+  +date : date
+  +department_id : int
+  +equipment_type : str
+  +equipment_name : str
+  +downtime_hours : float
 }
 class SafetyViolationBase {
-+date : date
-+department : str
-+type : str
-+audit_finding : bool
+  +date : date
+  +department_id : int
+  +violation_type : str
+  +is_audit_finding : bool
 }
-class SafetyStatistics {
-+total_violations : int
-+by_department : dict
 }
-class ExportRequest {
-+format : ExportFormat
-+report_type : str
-+filters : dict
+
+package "statistics" {
+class DescriptiveStats {
+  +count : int
+  +mean : float
+  +std : float
+  +min : float
+  +q1 : float
+  +median : float
+  +q3 : float
+  +max : float
+}
+class TrendResult {
+  +trend_direction : str
+  +slope : float
+  +r_squared : float
+  +p_value : float
+  +moving_avg : List
+  +forecast : List
+}
+class PoissonResult {
+  +lambda_est : float
+  +probabilities : List
+  +confidence_interval : Tuple
+}
+class CorrelationResult {
+  +pearson_r : float
+  +spearman_r : float
+  +p_value : float
+  +conclusion : str
 }
 }
 
 package "risk" {
-class RiskMatrixCell {
-+likelihood : int
-+severity : SeverityLevel
-+risk_level : int
-+color : RiskColor
-+rec : str
-}
-class RiskMatrixResult {
-+matrix : List<List>
-+assessment : dict
-}
 class FMEAResult {
-+id : UUID
-+failure_mode : str
-+severity : int
-+occurrence : int
-+detection : int
-+rpn : int
+  +failure_mode : str
+  +severity : int
+  +occurrence : int
+  +detection : int
+  +rpn : int
+  +rpn_ci : Tuple
 }
 class FMEAAnalysis {
-+name : str
-+items : List
-+avg_rpn : float
-+recommendations : List
+  +name : str
+  +items : List
+  +avg_rpn : float
+  +recommendations : List
 }
 }
 
-package "models" {
-class RiskAssessment {
-+id : int
-+method : str
-+name : str
-+input : JSON
-+result : JSON
-+created_at : datetime
-}
-class EquipmentFailure {
-+id : int
-+date : date
-+equipment : str
-+downtime : float
-+cost : float
-}
-class SafetyViolation {
-+id : int
-+date : date
-+department : str
-+type : str
-}
-class Incident {
-+id : int
-+date : date
-+department : str
-+type : str
-+severity : SeverityLevel
-}
-class MedicalExam {
-+id : int
-+date : date
-+profession : str
-+findings : str
-}
-}
-
-StatisticsResponse --> DescriptiveStats : "содержит"
-StatisticsResponse --> PoissonResult : "содержит 0..1"
-StatisticsResponse --> TrendResult : "содержит 0..1"
-
-IncidentBase --> IncidentStatistics : "генерирует"
-EquipmentFailureBase --> EquipmentStatistics : "генерирует"
-SafetyViolationBase --> SafetyStatistics : "генерирует"
-
-RiskAssessment --> RiskMatrixResult : "может генерировать 0..1"
-FMEAAnalysis --> FMEAResult : "запускает / содержит"
+Department "1" --> "*" Incident : "имеет"
+Department "1" --> "*" EquipmentFailure : "эксплуатирует"
+Department "1" --> "*" SafetyViolation : "допускает"
+Department "1" --> "*" MedicalExam : "организует"
 
 Incident ..> IncidentBase : "соответствует"
 EquipmentFailure ..> EquipmentFailureBase : "соответствует"
 SafetyViolation ..> SafetyViolationBase : "соответствует"
 
-RiskMatrixCell "1" --> "1" RiskMatrixCell : "оценивает"
-FMEAResult "1" --> "1" FMEAResult : "отображается в"
+FMEAAnalysis --> "*" FMEAResult : "содержит"
 @enduml

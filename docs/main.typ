@@ -1,10 +1,14 @@
 #import "template.typ": start-appendixes, start-page-numbering, structural-heading, template
 
-#show: template
-
-#for i in range(1, 3) [
-  #pagebreak()
+#set page(margin: 0pt)
+#let count = 3
+#[
+  #for p in range(1, count + 1) {
+    image("./титульник.pdf", page: p)
+  }
 ]
+
+#show: template
 
 #include "abstract.typ"
 #pagebreak()

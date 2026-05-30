@@ -23,6 +23,8 @@ class FMEAResult(BaseModel):
     detection: int
     detection_label: str
     rpn: int
+    rpn_low: int = 0
+    rpn_high: int = 0
     action_priority: str
     color: str
 
