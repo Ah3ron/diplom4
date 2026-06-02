@@ -2,7 +2,7 @@
 
 #heading(level: 1, numbering: none, outlined: false)[РЕФЕРАТ]
 
-Дипломный проект: 65 с., 16 рис., 13 табл., 31 источник, 4 приложения.
+Дипломный проект: 76 с., 16 рис., 15 табл., 31 источник, 7 приложений.
 
 ОЦЕНКА РИСКОВ, FMEA, АНАЛИЗ ПУАССОНА, ТРЕНД-АНАЛИЗ, ПРОГРАММНЫЙ МОДУЛЬ, СТАТИСТИЧЕСКИЕ МОДЕЛИ, БАЗА ДАННЫХ, ВЕБ-ПРИЛОЖЕНИЕ, FASTAPI, REACT
 
@@ -25,16 +25,16 @@
 Автор работы подтверждает, что приведенный в ней материал правильно и объективно отражает состояние исследуемого процесса (разрабатываемого объекта), все заимствованные из литературных и других источников теоретические, методологические и методические положения и концепции сопровождаются ссылками на их авторов.
 
 #align(right)[
- #line(length: 20%)
- #v(0pt, weak: true)
- #text(size: 12pt)[(подпись) #box(width: 18pt )]
+  #line(length: 20%)
+  #v(0pt, weak: true)
+  #text(size: 12pt)[(подпись) #box(width: 18pt)]
 ]
 
 #pagebreak()
 
 #heading(level: 1, numbering: none, outlined: false)[ABSTRACT]
 
-Diploma project: 65 p., 16 figures, 13 tables, 31 sources, 4 appendices.
+Diploma project: 76 p., 16 figures, 15 tables, 31 sources, 7 appendices.
 
 RISK ASSESSMENT, FMEA, POISSON ANALYSIS, TREND ANALYSIS, SOFTWARE MODULE, STATISTICAL MODELS, DATABASE, WEB APPLICATION, FASTAPI, REACT.
 
@@ -57,7 +57,7 @@ Technical and economic, social significance: the developed software module will 
 The author of the work confirms that the material given in it correctly and objectively reflects the state of the investigated process (developed object), all theoretical, methodological and methodological provisions and concepts borrowed from literature and other sources are accompanied by references to their authors.
 
 #align(right)[
- #line(length: 20%)
- #v(0pt, weak: true)
- #text(size: 12pt)[(подпись) #box(width: 18pt )]
+  #line(length: 20%)
+  #v(0pt, weak: true)
+  #text(size: 12pt)[(signature) #box(width: 18pt)]
 ]
