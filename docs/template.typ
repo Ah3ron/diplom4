@@ -25,10 +25,11 @@
   set page(
     paper: "a4",
     margin: (top: 20mm, bottom: 20mm, left: 30mm, right: 15mm),
-    footer: context {
+    header: context {
       let page-num = counter(page).get().first()
       if page-number-on.get() { align(center)[#page-num] }
     },
+    footer: none,
   )
 
   set text(font: "Times New Roman", size: 14pt, lang: "ru")
