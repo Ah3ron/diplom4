@@ -13,7 +13,7 @@
 #include "abstract.typ"
 #pagebreak()
 
-#heading(level: 1, numbering: none, outlined: false)[СОДЕРЖАНИЕ]
+#heading(level: 1, numbering: none, outlined: false)[ОГЛАВЛЕНИЕ]
 #outline(title: none, indent: auto, depth: 3)
 #pagebreak()
 
@@ -39,3 +39,6 @@
 
 #show: start-appendixes
 #include "appendix.typ"
+
+#set page(margin: 0pt)
+#image("./ведомость.pdf", width: 100%)
