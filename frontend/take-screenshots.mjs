@@ -1,10 +1,13 @@
 import { chromium } from "@playwright/test"
 import { existsSync, mkdirSync } from "fs"
-import { resolve } from "path"
+import { resolve, dirname } from "path"
+import { fileURLToPath } from "url"
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const FRONTEND_URL = "http://localhost:5173"
-const SCREENSHOTS_DIR = resolve(import.meta.dirname, "screenshots")
-const MAX_HEIGHT = 2000
+const SCREENSHOTS_DIR = resolve(__dirname, "..", "docs", "screenshots")
 const TIMEOUT = 45000
 
 async function waitForServer(url, label) {
@@ -72,19 +75,21 @@ async function main() {
   await snap(page, "statistics_trend")
 
   console.log("Screenshot: statistics_poisson")
-  await page.click('button[role="tab"]:has-text("Анализ Пуассона")')
-  await page.waitForTimeout(1000)
-  await page.click('button:has-text("Рассчитать")')
-  await page.waitForResponse((res) => res.url().includes("/statistics/poisson") && res.status() === 200, { timeout: 15000 })
+  await page.click('button[role="tab"]:has-text("Пуассон")')
   await page.waitForTimeout(1500)
+  try {
+    await page.click('button:has-text("Рассчитать")', { timeout: 3000 })
+    await page.waitForTimeout(5000)
+  } catch {}
   await snap(page, "statistics_poisson")
 
   console.log("Screenshot: fmea")
   await page.goto(`${FRONTEND_URL}/fmea`, { waitUntil: "networkidle", timeout: 30000 })
-  await page.waitForTimeout(1000)
-  await page.click('button:has-text("Провести FMEA-анализ")')
-  await page.waitForResponse((res) => res.url().includes("/risk/fmea") && res.status() === 200, { timeout: 15000 })
   await page.waitForTimeout(1500)
+  try {
+    await page.click('button:has-text("FMEA")', { timeout: 3000 })
+    await page.waitForTimeout(5000)
+  } catch {}
   await snap(page, "fmea")
 
   console.log("Screenshot: export")

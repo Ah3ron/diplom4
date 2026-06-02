@@ -130,6 +130,6 @@
   })
 
   state("appendix-active").update(true)
-  counter(heading).update(0)
+  counter(heading).update(1)
   body
 }

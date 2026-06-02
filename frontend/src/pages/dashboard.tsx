@@ -27,10 +27,10 @@ import {
 } from "recharts"
 
 const RISK_COLORS: Record<string, string> = {
-  "Смертельный": "#7f1d1d",
-  "Тяжёлый": "#dc2626",
-  "Средний": "#f59e0b",
-  "Лёгкий": "#22c55e",
+  "смертельный": "#b91c1c",
+  "тяжёлый": "#f97316",
+  "средний": "#eab308",
+  "лёгкий": "#22c55e",
 }
 
 const CHART_COLORS = ["#2563eb", "#dc2626", "#16a34a", "#ea580c", "#7c3aed"]
