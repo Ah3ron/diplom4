@@ -1,8 +1,6 @@
 #import "template.typ": structural-heading
 #structural-heading("ПЕРЕЧЕНЬ УСЛОВНЫХ ОБОЗНАЧЕНИЙ")
 
-#set par(first-line-indent: 0cm)
-
 #let tbl = (
   ("БД", "база данных"),
   ("ВК", "вторичный ключ"),
