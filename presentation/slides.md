@@ -1,12 +1,9 @@
 ---
 theme: seriph
 title: Программный модуль оценки производственных рисков
-info: Дипломный проект — защита
-author: Лешкевич
+author: Лешкевич А.П.
 transition: slide-left
 colorSchema: light
-layout: center
-class: text-center
 fonts:
   sans: Inter
   serif: PT Serif
@@ -15,57 +12,49 @@ themeConfig:
   primary: "#4f46e5"
 ---
 
-<style>
-h1 {
-  background: linear-gradient(135deg, #312e81, #4f46e5, #6366f1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-</style>
+# Программный модуль оценки производственных рисков на основе статистических моделей
 
-<div class="text-3xl font-bold leading-tight">
-  Программный модуль оценки<br/>
-  производственных рисков<br/>
-  <span style="background: linear-gradient(135deg, #4f46e5, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">на основе статистических моделей</span>
-</div>
+Дипломный проект
 
-<div class="pt-6 text-base opacity-70">
-  Дипломный проект
-</div>
+ЗАО «Солигорский институт проблем ресурсосбережения с опытным производством»
 
-<div class="pt-2 text-sm opacity-50">
-  ЗАО «Солигорский институт проблем ресурсосбережения с опытным производлением»
-</div>
-
-<div class="absolute bottom-4 right-6 text-xs opacity-40">
-  2025
+<div class="abs-bl m-6 text-sm opacity-50">
+Студент группы 21ИТ-1: Лешкевич А.П. · Научный руководитель: Ю.М. Вишняков · ПИНСК 2025
 </div>
 
 ---
 
-# Цель и задачи
+# Актуальность, цель и задачи
 
-<div class="mt-2 p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-sm">
-<strong>Цель:</strong> разработка программного модуля оценки производственных рисков ЗАО «СИПР» на основе статистических моделей
-</div>
+ЗАО «СИПР» — 1300+ сотрудников, 117 станков с ЧПУ, производство для ОАО «Беларуськалий». Текущий ручной расчёт рисков в Excel порождает субъективность оценки и отсутствие единой аналитической базы.
 
-<br/>
+<div class="grid grid-cols-4 gap-4 mt-4">
+<div class="p-3 rounded bg-indigo-50 border border-indigo-100 text-xs">
 
-<div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-<div class="p-3 rounded-lg bg-white shadow-sm border border-gray-100">
+**1. Предметная область**
 
-1. Анализ предметной области
-2. Сравнительный анализ аналогов
-3. Проектирование базы данных
+Анализ производственных рисков СИПР и нормативной базы
 
 </div>
-<div class="p-3 rounded-lg bg-white shadow-sm border border-gray-100">
+<div class="p-3 rounded bg-indigo-50 border border-indigo-100 text-xs">
 
-1. Разработка программного модуля
-2. Тестирование и отладка
-3. Расчёт экономических показателей
-4. Мероприятия по охране труда
+**2. Проектирование**
+
+Архитектура, БД (6 таблиц), UML-диаграммы
+
+</div>
+<div class="p-3 rounded bg-indigo-50 border border-indigo-100 text-xs">
+
+**3. Статистические модели**
+
+Описательная статистика, тренд, Пуассон, корреляция, FMEA
+
+</div>
+<div class="p-3 rounded bg-indigo-50 border border-indigo-100 text-xs">
+
+**4. Разработка и тестирование**
+
+FastAPI + React, 10 тест-примеров
 
 </div>
 </div>
@@ -80,7 +69,7 @@ h1 {
 **ЗАО «Солигорский институт проблем ресурсосбережения с опытным производством»**
 
 - Основан в 1991 г., г. Солигорск
-- **1 300+** сотрудников
+- **1300+** сотрудников
 - 391 патент, 256 наименований продукции
 - Заказчик — ОАО «Беларуськалий»
 - ISO 9001, ISO 45001
@@ -108,7 +97,7 @@ h1 {
 <div class="grid grid-cols-2 gap-6 text-sm">
 <div class="p-4 rounded-xl bg-red-50 border border-red-100">
 
-### 🔴 Текущий подход
+### Текущий подход
 
 - Ручная оценка рисков (матрица)
 - Высокая субъективность
@@ -118,7 +107,7 @@ h1 {
 </div>
 <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
 
-### 🟢 Необходимое решение
+### Необходимое решение
 
 - Автоматизация на основе **статистических методов**
 - Объективная количественная оценка
@@ -131,45 +120,24 @@ h1 {
 <br/>
 
 <div class="p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-sm">
-<strong>Вывод:</strong> аналоги (SAP EHS, Intelex, Dyadem) не подходят — стоимость, нет локализации, закрытый код
+Вывод: аналоги (SAP EHS, Intelex, Dyadem) не подходят — стоимость, нет локализации, закрытый код
 </div>
 
 ---
 
 # Сравнительный анализ аналогов
 
-<div class="text-sm">
+| Критерий | SAP EHS | Intelex | Dyadem | **Наш модуль** |
+| --- | --- | --- | --- | --- |
+| Стоимость | Очень высокая | Высокая | Высокая | **Низкая** |
+| Локализация RU/BY | Нет | Нет | Нет | **Полная** |
+| Статист. модели | Ограничены | Базовые | Базовые | **5 методов** |
+| FMEA-анализ | Платный | Нет | Да | **Автоматич.** |
+| Исходный код | Закрытый | Закрытый | Закрытый | **Открытый** |
+| Отчёты по ГОСТ | Нет | Нет | Нет | **Да** |
 
-| Критерий          | SAP EHS    | Intelex  | Dyadem   | **Наш модуль** |
-| ----------------- | ---------- | -------- | -------- | -------------- |
-| Стоимость         | Высокая    | Высокая  | Высокая  | **Низкая**     |
-| Локализация RU/BY | Нет        | Нет      | Нет      | **Да**         |
-| Статист. модели   | Ограничены | Базовые  | Базовые  | **4 метода**   |
-| FMEA-анализ       | Платный    | Нет      | Да       | **Автоматич.** |
-| Исходный код      | Закрытый   | Закрытый | Закрытый | **Открытый**   |
-| Отчёты по ГОСТ    | Нет        | Нет      | Нет      | **Да**         |
-
-</div>
-
----
-
-# Обоснование входных данных
-
-<div class="text-xs">
-
-| Поле | Нормативная база | Метод анализа |
-| --- | --- | --- |
-| date | СТБ ISO 45001 — хронорегистрация | Тренд, Пуассон, группировка |
-| department_id | ГОСТ 12.0.230 — учёт по подразделениям | Фильтрация, FMEA, дашборд |
-| severity | ГОСТ Р 51901 — шкала тяжести | FMEA: S (Severity) |
-| days_lost | Закон «Об охране труда» — нетрудоспособность | Описательная статистика, тренд |
-| equipment_type | ISO 45001 — идентификация оборудования | FMEA: группировка |
-| operating_hours | ГОСТ Р 51901 — наработка на отказ | MTBF, O (Occurrence) |
-| downtime_hours | ISO 45001 — учёт простоев | FMEA: S, описательная статистика |
-| failure_cause | ISO/IEC 31010 — анализ причин | FMEA: виды отказов |
-| violation_type | ГОСТ 12.0.230 — классификация нарушений | Корреляция, FMEA: D |
-| is_audit_finding | СТБ ISO 45001 — результаты аудитов | FMEA: D (Detection) |
-
+<div class="mt-2 text-sm opacity-70">
+Разрабатываемый модуль превосходит аналоги за счёт отраслевой специализации, локализации и минимальной стоимости.
 </div>
 
 ---
@@ -180,6 +148,7 @@ h1 {
 <div class="p-3 rounded-xl bg-blue-50 border border-blue-100">
 
 ### Тренд-анализ
+
 - Растущий тренд → **тревога**
 - p < 0.05 → значим
 - R² > 0.7 → прогноз надёжен
@@ -188,6 +157,7 @@ h1 {
 <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
 
 ### Пуассон
+
 - P(X≥1) > 0.9 → критический риск
 - χ² p > 0.05 → модель адекватна
 
@@ -195,6 +165,7 @@ h1 {
 <div class="p-3 rounded-xl bg-amber-50 border border-amber-100">
 
 ### FMEA (RPN)
+
 - < 50 — мониторинг
 - 50–150 — план мероприятий
 - \> 150 — **немедленные действия**
@@ -203,6 +174,7 @@ h1 {
 <div class="p-3 rounded-xl bg-violet-50 border border-violet-100">
 
 ### Корреляция
+
 - \|r\| > 0.7 — сильная связь
 - p < 0.05 — значима
 - Инциденты ↔ отказы → приоритет ТОиР
@@ -233,9 +205,9 @@ h1 {
 - risk_assessments
 
 </div>
-<div class="flex items-center">
+<div>
 
-<img src="/diagrams/physical_model.png" class="w-full max-h-[50vh] object-contain rounded-xl shadow-lg" />
+<img src="/diagrams/physical_model.png" class="w-full max-h-[40vh] object-contain" />
 
 </div>
 </div>
@@ -278,85 +250,106 @@ Async API, RESTful, открытый код
 
 ---
 
-<div class="flex flex-col items-center">
+# Модель данных — Концептуальная
 
-# Алгоритм работы модуля
-
-<img src="/diagrams/algorithm.png" class="max-h-[40vh] object-contain rounded-xl shadow-lg mt-2" />
-
-</div>
+<img src="/diagrams/conceptual_model.png" class="max-h-[42vh] object-contain mx-auto" />
 
 ---
 
-# Функциональные возможности
+# Модель данных — Логическая
 
-<div class="grid grid-cols-2 gap-6">
-<div class="text-sm">
-
-**9 вариантов использования:**
-
-1. Загрузка данных (CSV/Excel)
-2. Просмотр и фильтрация
-3. Дашборд с аналитикой
-4. Описательная статистика
-5. Тренд-анализ с прогнозом
-6. Анализ Пуассона
-7. FMEA-анализ (автомат.)
-8. Экспорт PDF (ГОСТ)
-9. Экспорт в Excel
-
-</div>
-<div class="flex items-center">
-
-<img src="/diagrams/use_case.png" class="w-full max-h-[48vh] object-contain rounded-xl shadow-lg" />
-
-</div>
-</div>
+<img src="/diagrams/logical_model.png" class="max-h-[42vh] object-contain mx-auto" />
 
 ---
 
-<div class="flex flex-col items-center">
+# Модель данных — Физическая
+
+<img src="/diagrams/physical_model.png" class="max-h-[42vh] object-contain mx-auto" />
+
+---
+
+# Алгоритм функционирования
+
+<img src="/diagrams/algorithm.png" class="max-h-[42vh] object-contain mx-auto" />
+
+---
+
+# Диаграмма вариантов использования
+
+<img src="/diagrams/use_case.png" class="max-h-[42vh] object-contain mx-auto" />
+
+---
+
+# Диаграмма классов
+
+<img src="/diagrams/class_diagram.png" class="max-h-[42vh] object-contain mx-auto" />
+
+---
+
+# Диаграмма последовательности
+
+<img src="/diagrams/sequence_diagram.png" class="max-h-[42vh] object-contain mx-auto" />
+
+---
 
 # Интерфейс — Дашборд
 
-<img src="/screenshots/dashboard.png" class="max-h-[52vh] object-contain rounded-xl shadow-lg mt-2" />
-
-</div>
+<img src="/screenshots/dashboard.png" class="max-h-[42vh] object-contain mx-auto" />
 
 ---
 
-# Методы анализа
+# Модули статистического анализа
 
 <div class="grid grid-cols-2 gap-4 text-sm">
 <div class="p-4 rounded-xl bg-blue-50 border border-blue-100">
 
-### 📊 Описательная статистика
+### Описательная статистика
 
 Количество, среднее, медиана, СКО, мин/макс, квартили Q1/Q3
 
 </div>
 <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
 
-### 📈 Тренд-анализ
+### Тренд-анализ
 
-Линейная регрессия, прогноз с 95% доверит. интервалом, R²
+Линейная регрессия (OLS), прогноз с 95% доверит. интервалом, R², p-value
 
 </div>
 <div class="p-4 rounded-xl bg-violet-50 border border-violet-100">
 
-### 🔢 Анализ Пуассона
+### Анализ Пуассона
 
-Оценка λ, распределение вероятностей, 95% доверит. интервал
+Оценка λ (MLE), распределение вероятностей, χ²-критерий, 95% ДИ
 
 </div>
 <div class="p-4 rounded-xl bg-amber-50 border border-amber-100">
 
-### ⚠️ FMEA-анализ
+### FMEA-анализ
 
-S, O, D из данных БД → RPN = S × O × D, ранжирование
+S, O, D из данных БД → RPN = S × O × D с 95% ДИ (бутстрэп 1000 итераций)
 
 </div>
 </div>
+
+<br/>
+
+<div class="p-3 rounded-xl bg-cyan-50 border border-cyan-100 text-sm">
+
+**Корреляционный анализ:** Пирсон r, Спирмен ρ, p-value для 3 пар (инциденты ↔ отказы ↔ нарушения)
+
+</div>
+
+---
+
+# Тренд-анализ — интерфейс
+
+<img src="/screenshots/statistics_trend.png" class="max-h-[42vh] object-contain mx-auto" />
+
+---
+
+# FMEA-анализ — интерфейс
+
+<img src="/screenshots/fmea.png" class="max-h-[42vh] object-contain mx-auto" />
 
 ---
 
@@ -371,10 +364,6 @@ $$y = a \cdot x + b, \quad a = \text{slope}, \; b = \text{intercept}$$
 **Коэффициент детерминации:**
 
 $$R^2 = r^2 \quad \text{(из } \texttt{scipy.stats.linregress)}$$
-
-**Прогноз:**
-
-$$\hat{y}_i = a \cdot x_i + b, \quad x_i > n$$
 
 **95%-ный доверительный интервал прогноза:**
 
@@ -402,7 +391,7 @@ $$P(X = k) = \frac{\lambda^k \cdot e^{-\lambda}}{k!}$$
 
 $$P(X \geq 1) = 1 - e^{-\lambda}$$
 
-**95%-ный доверительный интервал для λ·T (многопериодный):**
+**95%-ный доверительный интервал для λ·T:**
 
 $$\text{CI}_{0.95} = \texttt{scipy.stats.poisson.interval}(0.95,\; \hat{\lambda} \cdot T)$$
 
@@ -422,25 +411,7 @@ $$\text{RPN} = S \times O \times D \quad \in [1,\; 1000]$$
 - **O (частота)** — количество отказов в месяц, приведённое к шкале 1–10
 - **D (обнаружимость)** — на основе доли нарушений и результатов аудитов (1–10)
 
-</div>
-
----
-
-<div class="flex flex-col items-center">
-
-# FMEA-анализ
-
-<img src="/screenshots/fmea.png" class="max-h-[52vh] object-contain rounded-xl shadow-lg mt-2" />
-
-</div>
-
----
-
-<div class="flex flex-col items-center">
-
-# Тренд-анализ
-
-<img src="/screenshots/statistics_trend.png" class="max-h-[52vh] object-contain rounded-xl shadow-lg mt-2" />
+**95% доверительный интервал RPN:** бутстрэп с 1000 итерациями
 
 </div>
 
@@ -453,26 +424,26 @@ $$\text{RPN} = S \times O \times D \quad \in [1,\; 1000]$$
 
 ### Затраты на разработку
 
-| Статья          | BYN         |
-| --------------- | ----------- |
-| Оплата труда    | 80 235      |
-| Соц. отчисления | 27 360      |
-| Материалы       | 229         |
-| Амортизация     | 976         |
-| Прочие          | 8 024       |
-| **Итого**       | **116 824** |
+| Статья | BYN |
+| --- | --- |
+| Оплата труда | 80 235 |
+| Соц. отчисления | 27 360 |
+| Материалы | 229 |
+| Амортизация | 976 |
+| Прочие | 8 024 |
+| **Итого** | **116 824** |
 
 </div>
 <div>
 
 ### Эффективность
 
-| Показатель       | Значение       |
-| ---------------- | -------------- |
+| Показатель | Значение |
+| --- | --- |
 | Годовая экономия | **17 352 BYN** |
-| ROI              | 14.9%          |
-| Окупаемость      | **6.7 года**   |
-| NPV (5 лет)      | −50 637 BYN    |
+| ROI | 14.9% |
+| Окупаемость | **6.7 года** |
+| NPV (5 лет) | −50 637 BYN |
 
 <br/>
 
@@ -491,36 +462,27 @@ $$\text{RPN} = S \times O \times D \quad \in [1,\; 1000]$$
 
 Все 7 задач дипломного проекта выполнены:
 
-1. ✅ Анализ предметной области СИПР
-2. ✅ Обоснование собственной разработки
-3. ✅ БД: 3 модели, 6 таблиц, SQLite
-4. ✅ FastAPI + React, 4 метода анализа
-5. ✅ Тестирование: 10/10 пройдено
-6. ✅ Экономика: 116 824 BYN, 6.7 года
-7. ✅ Охрана труда: мероприятия разработаны
+1. Анализ предметной области СИПР
+2. Обоснование собственной разработки
+3. БД: 3 модели, 6 таблиц, SQLite
+4. FastAPI + React, 5 методов анализа
+5. Тестирование: 10/10 пройдено
+6. Экономика: 116 824 BYN, окупаемость 6.7 года
+7. Охрана труда: мероприятия разработаны
 
 </div>
 
 <br/>
 
 <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 inline-block text-sm">
-<strong>Модуль рекомендован к внедрению на ЗАО «СИПР»</strong>
+Модуль рекомендован к внедрению на ЗАО «СИПР»
 </div>
 
 ---
 
-<style>
-h1 {
-  background: linear-gradient(135deg, #4f46e5, #06b6d4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-</style>
-
 # Спасибо за внимание
 
 <div class="mt-6">
-  <img src="/qr-repo.png" class="w-24 mx-auto rounded-xl shadow" />
-  <div class="mt-2 text-xs opacity-50">github.com/Ah3ron/diplom4</div>
+<img src="/qr-repo.png" class="w-24 mx-auto rounded-xl shadow" />
+<div class="mt-2 text-xs opacity-50">github.com/Ah3ron/diplom4</div>
 </div>
