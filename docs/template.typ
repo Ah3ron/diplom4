@@ -107,7 +107,11 @@
 
 #let structural-heading(title) = heading(level: 1, numbering: none, outlined: true)[#title]
 
-#let start-page-numbering() = page-number-on.update(true)
+#let start-page-numbering() = context {
+  let p = counter(page).get().first()
+  counter(page).update(p - 2)
+  page-number-on.update(true)
+}
 
 #let start-appendixes(body) = {
   set heading(numbering: appendix-numbering, hanging-indent: 0pt)
