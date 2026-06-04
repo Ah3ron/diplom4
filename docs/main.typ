@@ -15,10 +15,10 @@
 
 #heading(level: 1, numbering: none, outlined: false)[ОГЛАВЛЕНИЕ]
 #outline(title: none, indent: auto, depth: 3)
+#start-page-numbering()
 #pagebreak()
 
 
-#start-page-numbering()
 #include "abbreviations.typ"
 #pagebreak()
 #include "introduction.typ"

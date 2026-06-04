@@ -44,10 +44,20 @@
   set enum(indent: 1.25cm, body-indent: 0.5em, spacing: 0.4em)
 
   // Рисунки
-  show figure.where(kind: image): set figure(supplement: [Рисунок], numbering: _chapter-numbering)
-  show figure.where(kind: raw): set figure(supplement: [Рисунок], numbering: _chapter-numbering)
+  show figure.where(kind: image): set figure(supplement: [рисунок], numbering: _chapter-numbering)
+  show figure.where(kind: raw): set figure(supplement: [рисунок], numbering: _chapter-numbering)
+  show figure.where(kind: image): it => context {
+    align(center, {
+      it.body
+      v(4pt)
+      set text(size: 14pt)
+      set par(justify: false, first-line-indent: (amount: 0cm))
+      [Рисунок #it.counter.display() – #it.caption.body]
+    })
+  }
 
   // Таблицы
+  show figure: set block(breakable: true)
   show figure.where(kind: table): set figure(supplement: none, numbering: _chapter-numbering)
   show figure.where(kind: table): it => context {
     set text(size: 12pt)

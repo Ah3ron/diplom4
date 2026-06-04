@@ -2,7 +2,7 @@
 
 #heading(level: 1, numbering: none, outlined: false)[РЕФЕРАТ]
 
-Дипломный проект: 76 с., 16 рис., 15 табл., 31 источник, 7 приложений.
+Дипломный проект: 74 с., 16 рис., 15 табл., 31 источник, 7 приложений.
 
 ОЦЕНКА РИСКОВ, FMEA, АНАЛИЗ ПУАССОНА, ТРЕНД-АНАЛИЗ, ПРОГРАММНЫЙ МОДУЛЬ, СТАТИСТИЧЕСКИЕ МОДЕЛИ, БАЗА ДАННЫХ, ВЕБ-ПРИЛОЖЕНИЕ, FASTAPI, REACT
 
@@ -34,7 +34,7 @@
 
 #heading(level: 1, numbering: none, outlined: false)[ABSTRACT]
 
-Diploma project: 76 p., 16 figures, 15 tables, 31 sources, 7 appendices.
+Diploma project: 74 p., 16 figures, 15 tables, 31 sources, 7 appendices.
 
 RISK ASSESSMENT, FMEA, POISSON ANALYSIS, TREND ANALYSIS, SOFTWARE MODULE, STATISTICAL MODELS, DATABASE, WEB APPLICATION, FASTAPI, REACT.
 
